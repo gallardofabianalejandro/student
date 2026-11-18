@@ -1,0 +1,40 @@
+# Blueprint de Render para pruebas. Render inyecta PORT (application.yml ya lo toma).
+# La imagen se publica con `task push_image` (IMAGE_NAME configurable) y Render la descarga.
+services:
+  - type: web
+    name: student
+    runtime: image
+    image:
+      url: docker.io/gallardofabian/student:latest
+    healthCheckPath: /actuator/health/readiness
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: JWT_SECRET
+        generateValue: true
+      - key: DB_HOST
+        fromDatabase:
+          name: student-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: student-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: student-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: student-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: student-db
+          property: password
+
+databases:
+  - name: student-db
+    plan: free
+    databaseName: student
+    user: student

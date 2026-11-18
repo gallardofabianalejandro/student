@@ -1,0 +1,17 @@
+spring:
+  cloud:
+    config:
+      enabled: false
+  docker:
+    compose:
+      enabled: false
+app:
+  web:
+    username: test
+    password: test
+  auth:
+    secure-cookie: false
+    registration-enabled: true
+  infra:
+    jwt:
+      secret: test-only-secret-test-only-secret-0123456789

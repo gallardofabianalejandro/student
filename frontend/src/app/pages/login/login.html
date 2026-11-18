@@ -1,0 +1,23 @@
+<section class="mx-auto max-w-sm">
+  <h1 class="text-2xl font-bold">Ingresar</h1>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 space-y-4">
+    <label class="block text-sm">
+      Usuario
+      <input formControlName="username" autocomplete="username"
+             class="mt-1 w-full rounded border border-slate-300 px-3 py-2" />
+    </label>
+    <label class="block text-sm">
+      Contraseña
+      <input type="password" formControlName="password" autocomplete="current-password"
+             class="mt-1 w-full rounded border border-slate-300 px-3 py-2" />
+    </label>
+    @if (error(); as message) {
+      <p role="alert" class="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{{ message }}</p>
+    }
+    <button type="submit" [disabled]="form.invalid || loading()"
+            class="w-full rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700 disabled:opacity-50">
+      {{ loading() ? 'Ingresando…' : 'Ingresar' }}
+    </button>
+  </form>
+  <p class="mt-4 text-sm text-slate-600">¿No tenés cuenta? <a routerLink="/register" class="underline">Registrate</a></p>
+</section>

@@ -1,0 +1,14 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": ["config:recommended"],
+  "packageRules": [
+    {
+      "matchPackageNames": ["org.testcontainers:**"],
+      "groupName": "testcontainers"
+    },
+    {
+      "matchPackageNames": ["org.springframework.boot:**"],
+      "groupName": "spring-boot"
+    }
+  ]
+}

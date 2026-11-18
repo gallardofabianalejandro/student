@@ -1,0 +1,122 @@
+version: '3'
+
+vars:
+  MVN: '{{if eq OS "windows"}}mvn.cmd{{else}}mvn{{end}}'
+  NPM: '{{if eq OS "windows"}}npm.cmd{{else}}npm{{end}}'
+  IMAGE_NAME: '{{default "gallardofabian/student" .IMAGE_NAME}}'
+  VERSION:
+    sh: '{{.MVN}} -B -q help:evaluate -Dexpression=project.version -DforceStdout'
+
+tasks:
+  default:
+    cmds:
+      - task: test
+
+  format:
+    desc: Formatea el código (Spotless / palantir-java-format)
+    cmds:
+      - "{{.MVN}} -B spotless:apply"
+
+  test:
+    desc: Formatea y corre todos los tests
+    deps: [format]
+    cmds:
+      - "{{.MVN}} -B clean verify"
+
+  verify:
+    desc: Verificación sin formatear (la usa CI)
+    cmds:
+      - "{{.MVN}} -B -ntp verify"
+
+  run:
+    desc: Levanta la app con perfil local (usa compose.yml via spring-boot-docker-compose)
+    cmds:
+      - "{{.MVN}} -B spring-boot:run -Dspring-boot.run.profiles=local"
+
+  run_tc:
+    desc: Levanta la app con Testcontainers (sin compose) vía TestApplication
+    cmds:
+      - "{{.MVN}} -B spring-boot:test-run -Dspring-boot.run.profiles=local"
+
+  build_image:
+    desc: Construye la imagen con Jib (IMAGE_NAME configurable)
+    cmds:
+      - "{{.MVN}} -B -DskipTests jib:dockerBuild -Djib.to.image={{.IMAGE_NAME}}:{{.VERSION}}"
+
+  push_image:
+    desc: Construye y publica la imagen (requiere login previo al registry)
+    cmds:
+      - "{{.MVN}} -B -DskipTests jib:build -Djib.to.image={{.IMAGE_NAME}}:{{.VERSION}}"
+
+  local-up:
+    desc: Levanta las dependencias locales (compose.yml)
+    cmds:
+      - docker compose up -d --wait
+
+  local-down:
+    desc: Baja las dependencias locales
+    cmds:
+      - docker compose down
+
+  local-logs:
+    desc: Logs de las dependencias locales
+    cmds:
+      - docker compose logs -f
+
+  k8s_apply:
+    desc: Aplica los manifests kustomize (deployment/base)
+    cmds:
+      - kubectl apply -k deployment/base
+
+  front_install:
+    desc: Instala las dependencias del front (npm ci). Requiere Node 24 (mise install)
+    dir: frontend
+    cmds:
+      - "{{.NPM}} ci"
+
+  front_dev:
+    desc: Front con recarga en vivo en http://localhost:4200 (proxy de /api al backend en 8080)
+    dir: frontend
+    cmds:
+      - "{{.NPM}} start"
+
+  front_test:
+    desc: Tests de Angular (Vitest)
+    dir: frontend
+    cmds:
+      - "{{.NPM}} test -- --watch=false"
+
+  new_entity:
+    desc: "Genera un CRUD completo. Ej: task new_entity -- Alumno nombre:String edad:Integer email:String?"
+    cmds:
+      - java tools/NewEntity.java {{.CLI_ARGS}}
+
+  coverage:
+    desc: Corre verify y muestra donde quedo el reporte de cobertura (JaCoCo)
+    cmds:
+      - "{{.MVN}} -B -ntp verify"
+      - 'echo "Reporte: target/site/jacoco/index.html"'
+
+  deps_updates:
+    desc: Lista las dependencias con versiones nuevas disponibles
+    cmds:
+      - "{{.MVN}} -B -ntp versions:display-dependency-updates"
+
+  doctor:
+    desc: Muestra las versiones de las herramientas (Java, Maven, Docker, Node)
+    cmds:
+      - java -version
+      - "{{.MVN}} -v"
+      - docker --version
+      - node --version
+
+  db_reset:
+    desc: Borra y recrea la base local (pierde los datos locales)
+    cmds:
+      - docker compose down -v postgres
+      - docker compose up -d --wait postgres
+
+  clean:
+    desc: Limpia target/
+    cmds:
+      - "{{.MVN}} -B clean"

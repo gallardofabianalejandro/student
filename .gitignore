@@ -1,0 +1,7 @@
+target/
+.env.properties
+.idea/
+*.iml
+.vscode/
+git.properties
+.flattened-pom.xml

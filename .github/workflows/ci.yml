@@ -1,0 +1,38 @@
+name: Build
+
+on:
+  push:
+    branches: [ "main", "release", "fix/*", "feat/*" ]
+    paths-ignore:
+      - "*.md"
+      - "docs/**"
+      - ".gitignore"
+      - "renovate.json"
+  pull_request:
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    env:
+      # Lectura de platform-parent/starters desde GitHub Packages (.mvn/settings.xml). Crear el secreto PACKAGES_TOKEN.
+      GH_PACKAGES_USER: ${{ github.actor }}
+      GH_PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version-file: .sdkmanrc
+          cache: maven
+
+      - name: Verify
+        run: mvn -B -ntp verify
+
+      - name: Publish image (release branch)
+        if: ${{ github.ref == 'refs/heads/release' }}
+        env:
+          IMAGE_NAME: ${{ vars.IMAGE_NAME }}
+        run: mvn -B -DskipTests jib:build -Djib.to.image=${IMAGE_NAME}:${{ github.sha }}

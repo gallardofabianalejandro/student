@@ -1,0 +1,45 @@
+# Autenticacion propia (capacidad jwt-auth). Orden: register -> login -> me.
+# En IntelliJ: elegir el entorno "local" (arriba a la derecha) y apretar el boton verde de cada pedido.
+# El login guarda el token en la variable {{token}}, que usan los demas archivos .http.
+
+### Registro (solo activo con el perfil local: app.auth.registration-enabled=true)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+### Login: devuelve el access token y deja la cookie refresh_token
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "username": "{{username}}",
+  "password": "{{password}}"
+}
+
+> {%
+  client.global.set("token", response.body.accessToken);
+  client.test("login devuelve token", function () {
+    client.assert(response.status === 200, "esperaba 200, vino " + response.status);
+    client.assert(!!response.body.accessToken, "falta accessToken");
+  });
+%}
+
+### Usuario actual
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### Renovar el token (usa la cookie refresh_token; el header X-Requested-With es obligatorio)
+POST {{baseUrl}}/api/auth/refresh
+X-Requested-With: XMLHttpRequest
+
+> {%
+  client.global.set("token", response.body.accessToken);
+%}
+
+### Logout
+POST {{baseUrl}}/api/auth/logout
+X-Requested-With: XMLHttpRequest

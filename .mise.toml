@@ -1,0 +1,4 @@
+[tools]
+java = "temurin-25"
+maven = "3.9.11"
+node = "24.15.0"

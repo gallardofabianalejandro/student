@@ -1,0 +1,57 @@
+# Pedidos de la API. Si el servicio tiene login (jwt-auth), correr antes "Login" en auth.http.
+# El CRUD de ejemplo (SampleItem) guarda el id creado en {{itemId}} para los pedidos siguientes.
+
+### Salud del servicio
+GET {{baseUrl}}/actuator/health
+
+> {%
+  client.test("el servicio esta UP", function () {
+    client.assert(response.body.status === "UP", "estado: " + response.body.status);
+  });
+%}
+
+### Documentacion de la API (OpenAPI en JSON)
+GET {{baseUrl}}/v3/api-docs
+
+### Crear un item (el nombre es unico: se genera uno distinto cada vez)
+POST {{baseUrl}}/api/v1/sample-items
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "item-{{$uuid}}",
+  "description": "creado desde el archivo .http",
+  "quantity": 5,
+  "price": 19.99
+}
+
+> {%
+  client.global.set("itemId", response.body.id);
+  client.test("creado", function () {
+    client.assert(response.status === 201, "esperaba 201, vino " + response.status);
+  });
+%}
+
+### Listar (paginado)
+GET {{baseUrl}}/api/v1/sample-items?page=0&size=20
+Authorization: Bearer {{token}}
+
+### Obtener por id
+GET {{baseUrl}}/api/v1/sample-items/{{itemId}}
+Authorization: Bearer {{token}}
+
+### Modificar
+PUT {{baseUrl}}/api/v1/sample-items/{{itemId}}
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "item-modificado-{{$uuid}}",
+  "description": "modificado desde el archivo .http",
+  "quantity": 10,
+  "price": 29.5
+}
+
+### Borrar
+DELETE {{baseUrl}}/api/v1/sample-items/{{itemId}}
+Authorization: Bearer {{token}}

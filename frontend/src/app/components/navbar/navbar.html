@@ -1,0 +1,17 @@
+<nav class="border-b border-slate-200 bg-white">
+  <div class="mx-auto flex max-w-3xl items-center justify-between px-4 py-3">
+    <a routerLink="/" class="text-lg font-semibold text-slate-900">student</a>
+    <div class="flex items-center gap-4 text-sm">
+      @if (auth.isAuthenticated()) {
+        <a routerLink="/dashboard" class="text-slate-700 hover:text-slate-900">Dashboard</a>
+        <span class="text-slate-500">{{ auth.user()?.username }}</span>
+        <button type="button" (click)="logout()" class="rounded bg-slate-900 px-3 py-1.5 text-white hover:bg-slate-700">
+          Salir
+        </button>
+      } @else {
+        <a routerLink="/login" class="text-slate-700 hover:text-slate-900">Ingresar</a>
+        <a routerLink="/register" class="rounded bg-slate-900 px-3 py-1.5 text-white hover:bg-slate-700">Registrarse</a>
+      }
+    </div>
+  </div>
+</nav>
