@@ -86,6 +86,19 @@ tasks:
     cmds:
       - "{{.NPM}} test -- --watch=false"
 
+  e2e_install:
+    desc: Instala Playwright y Chromium para las pruebas de punta a punta (una vez; descarga cientos de MB)
+    dir: e2e
+    cmds:
+      - "{{.NPM}} ci"
+      - "{{.NPM}} run install-browsers"
+
+  e2e:
+    desc: "Pruebas de punta a punta contra BASE_URL (por defecto http://localhost:8080; la app tiene que estar corriendo)"
+    dir: e2e
+    cmds:
+      - "{{.NPM}} test"
+
   new_entity:
     desc: "Genera un CRUD completo. Ej: task new_entity -- Alumno nombre:String edad:Integer email:String?"
     cmds:

@@ -1,14 +1,10 @@
 package dev.fabian.gallardo.student.api.spa;
 
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
+import com.nacionservicios.emv.jwt.autoconfigure.JwtAutoConfiguration;
 import dev.fabian.gallardo.student.api.rest.AuthController;
 import dev.fabian.gallardo.student.domain.port.in.LoginUseCase;
 import dev.fabian.gallardo.student.domain.port.in.RefreshTokenUseCase;
 import dev.fabian.gallardo.student.infrastructure.config.JwtSecurityConfig;
-import com.nacionservicios.emv.jwt.autoconfigure.JwtAutoConfiguration;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
@@ -16,6 +12,10 @@ import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.forwardedUrl;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 /** Con SPA: el shell y los assets son publicos, la API sigue exigiendo token. */
 @WebMvcTest(controllers = {AngularForwardController.class, AuthController.class}, properties = {
@@ -37,7 +37,7 @@ class SpaRoutingTest {
 
     @Test
     void spaRoutes_whenRequestedWithoutToken_thenForwardToIndex() throws Exception {
-        for (String route : new String[] {"/login", "/register", "/dashboard", "/dashboard/profile"}) {
+        for (String route : new String[]{"/login", "/register", "/dashboard", "/dashboard/profile", "/items"}) {
             mockMvc.perform(get(route)).andExpect(status().isOk()).andExpect(forwardedUrl("/index.html"));
         }
     }

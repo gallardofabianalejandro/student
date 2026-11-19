@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 @Controller
 public class AngularForwardController {
 
-    @GetMapping({"/login", "/register", "/dashboard", "/dashboard/**"})
+    @GetMapping({"/login", "/register", "/dashboard", "/dashboard/**", "/items"})
     String forwardToIndex() {
         return "forward:/index.html";
     }

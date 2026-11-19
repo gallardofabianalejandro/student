@@ -1,0 +1,14 @@
+{
+  "name": "e2e",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Pruebas de punta a punta (Playwright) del front. No forman parte de mvn verify.",
+  "scripts": {
+    "install-browsers": "playwright install chromium",
+    "test": "playwright test"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.65.1",
+    "@types/node": "24.19.2"
+  }
+}
