@@ -1,11 +1,31 @@
-<section class="text-center">
-  <h1 class="text-3xl font-bold">Bienvenido</h1>
-  <p class="mt-3 text-slate-600"> Aplicación Spring Boot con interfaz Angular y autenticación JWT. (flujo de prueba)</p>
-  <div class="mt-6">
+<section class="hero">
+  <span class="badge">Plantilla Spring Boot + Angular</span>
+  <h1>Bienvenido a <span class="grad-text">tu aplicación</span></h1>
+  <p class="lead">Aplicación Spring Boot con interfaz Angular y autenticación JWT. (flujo de prueba)</p>
+  <div class="cta">
     @if (auth.isAuthenticated()) {
-      <a routerLink="/dashboard" class="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700">Ir al dashboard</a>
+      <a routerLink="/dashboard" class="btn btn-primary">Ir al dashboard</a>
     } @else {
-      <a routerLink="/login" class="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700">Ingresar</a>
+      <a routerLink="/login" class="btn btn-primary">Ingresar</a>
+      <a routerLink="/register" class="btn btn-ghost">Crear cuenta</a>
     }
   </div>
+</section>
+
+<section class="grid-cards" aria-label="Características">
+  <article class="card feature">
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg></span>
+    <h3>Autenticación JWT</h3>
+    <p>Registro, ingreso y renovación de sesión ya resueltos.</p>
+  </article>
+  <article class="card feature">
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h10"/></svg></span>
+    <h3>CRUD con paginación</h3>
+    <p>Un listado de ejemplo para crear, editar y eliminar items.</p>
+  </article>
+  <article class="card feature">
+    <span class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-5-5H8z"/><path d="M14 3v5h5M9 13h6M9 17h4"/></svg></span>
+    <h3>API documentada</h3>
+    <p>Contrato OpenAPI disponible para integrar y probar.</p>
+  </article>
 </section>

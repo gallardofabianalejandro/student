@@ -1,78 +1,100 @@
-<section>
-  <h1 class="text-2xl font-bold">Items</h1>
-  <p class="mt-1 text-sm text-slate-600">CRUD de ejemplo contra <code>/api/v1/sample-items</code>.</p>
+<div class="page-head">
+  <div>
+    <h1>Items</h1>
+    <p class="muted" style="margin-top: 6px">CRUD de ejemplo contra <code>/api/v1/sample-items</code>.</p>
+  </div>
+</div>
 
-  @if (error(); as message) {
-    <p role="alert" class="mt-4 rounded bg-red-50 px-3 py-2 text-sm text-red-700">{{ message }}</p>
-  }
+@if (error(); as message) {
+  <p role="alert" class="alert" style="margin-bottom: 20px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+    {{ message }}
+  </p>
+}
 
-  <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 grid gap-3 rounded border border-slate-200 p-4 sm:grid-cols-2">
-    <h2 class="text-lg font-semibold sm:col-span-2">{{ editingId() ? 'Editar item' : 'Nuevo item' }}</h2>
-    <label class="block text-sm">
+<section class="card" aria-labelledby="form-title">
+  <h2 id="form-title" style="margin-bottom: 16px">{{ editingId() ? 'Editar item' : 'Nuevo item' }}</h2>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
+    <label class="field" for="name">
       Nombre
-      <input formControlName="name" class="mt-1 w-full rounded border border-slate-300 px-3 py-2" />
+      <input id="name" formControlName="name" class="input" />
     </label>
-    <label class="block text-sm">
+    <label class="field" for="description">
       Descripción
-      <input formControlName="description" class="mt-1 w-full rounded border border-slate-300 px-3 py-2" />
+      <input id="description" formControlName="description" class="input" />
     </label>
-    <label class="block text-sm">
+    <label class="field" for="quantity">
       Cantidad
-      <input type="number" min="0" formControlName="quantity" class="mt-1 w-full rounded border border-slate-300 px-3 py-2" />
+      <input id="quantity" type="number" min="0" formControlName="quantity" class="input" />
     </label>
-    <label class="block text-sm">
+    <label class="field" for="price">
       Precio
-      <input type="number" min="0" step="0.01" formControlName="price" class="mt-1 w-full rounded border border-slate-300 px-3 py-2" />
+      <input id="price" type="number" min="0" step="0.01" formControlName="price" class="input" />
     </label>
-    <div class="flex gap-2 sm:col-span-2">
-      <button type="submit" [disabled]="form.invalid || loading()"
-              class="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700 disabled:opacity-50">
+    <div class="full">
+      <button type="submit" [disabled]="form.invalid || loading()" class="btn btn-primary">
         {{ editingId() ? 'Guardar cambios' : 'Crear' }}
       </button>
       @if (editingId()) {
-        <button type="button" (click)="cancelEdit()" class="rounded border border-slate-300 px-4 py-2 hover:bg-slate-100">
-          Cancelar
-        </button>
+        <button type="button" (click)="cancelEdit()" class="btn btn-ghost">Cancelar</button>
       }
     </div>
   </form>
+</section>
 
+<section class="card" style="margin-top: 20px" aria-label="Listado de items">
   @if (current(); as page) {
     @if (page.content.length === 0) {
-      <p class="mt-6 text-sm text-slate-600">No hay items todavía. Creá el primero con el formulario.</p>
+      <div class="empty">
+        <div class="art">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 8l-9-5-9 5 9 5 9-5z"/><path d="M3 8v8l9 5 9-5V8M12 13v8"/></svg>
+        </div>
+        <h2>No hay items todavía</h2>
+        <p>Creá el primero con el formulario.</p>
+      </div>
     } @else {
-      <table class="mt-6 w-full text-left text-sm">
-        <thead class="border-b border-slate-300 text-slate-600">
-          <tr><th class="py-2">Nombre</th><th>Descripción</th><th>Cantidad</th><th>Precio</th><th></th></tr>
-        </thead>
-        <tbody>
-          @for (item of page.content; track item.id) {
-            <tr class="border-b border-slate-100">
-              <td class="py-2 font-medium">{{ item.name }}</td>
-              <td>{{ item.description }}</td>
-              <td>{{ item.quantity }}</td>
-              <td>{{ item.price }}</td>
-              <td class="space-x-2 text-right">
-                @if (pendingRemoval()?.id === item.id) {
-                  <span class="text-slate-600">¿Eliminar?</span>
-                  <button type="button" (click)="confirmRemove()" class="text-red-700 underline">Sí</button>
-                  <button type="button" (click)="cancelRemove()" class="underline">No</button>
-                } @else {
-                  <button type="button" (click)="edit(item)" class="underline">Editar</button>
-                  <button type="button" (click)="askRemove(item)" class="text-red-700 underline">Eliminar</button>
-                }
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-      <div class="mt-4 flex items-center justify-between text-sm text-slate-600">
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>Nombre</th><th>Descripción</th><th class="num">Cantidad</th><th class="num">Precio</th><th></th></tr>
+          </thead>
+          <tbody>
+            @for (item of page.content; track item.id) {
+              <tr>
+                <td class="name">{{ item.name }}</td>
+                <td class="muted">{{ item.description }}</td>
+                <td class="num">{{ item.quantity }}</td>
+                <td class="num">{{ item.price }}</td>
+                <td class="actions">
+                  @if (pendingRemoval()?.id === item.id) {
+                    <span class="confirm">
+                      ¿Eliminar?
+                      <button type="button" (click)="confirmRemove()" class="btn btn-danger btn-sm">Sí</button>
+                      <button type="button" (click)="cancelRemove()" class="btn btn-ghost btn-sm">No</button>
+                    </span>
+                  } @else {
+                    <button type="button" (click)="edit(item)" class="btn btn-ghost btn-sm">Editar</button>
+                    <button type="button" (click)="askRemove(item)" class="btn btn-danger btn-sm">Eliminar</button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+      <div class="pager">
         <span>Página {{ page.page + 1 }} de {{ page.totalPages }} · {{ page.totalElements }} items</span>
-        <span class="space-x-2">
-          <button type="button" (click)="previous()" [disabled]="page.first" class="rounded border border-slate-300 px-3 py-1 disabled:opacity-40">Anterior</button>
-          <button type="button" (click)="next()" [disabled]="page.last" class="rounded border border-slate-300 px-3 py-1 disabled:opacity-40">Siguiente</button>
+        <span class="btns">
+          <button type="button" (click)="previous()" [disabled]="page.first" class="btn btn-ghost btn-sm">Anterior</button>
+          <button type="button" (click)="next()" [disabled]="page.last" class="btn btn-ghost btn-sm">Siguiente</button>
         </span>
       </div>
     }
+  } @else if (loading()) {
+    <div aria-busy="true" aria-label="Cargando items">
+      @for (row of [1, 2, 3, 4]; track row) {
+        <div class="sk-row"><i class="sk"></i><i class="sk"></i><i class="sk"></i><i class="sk"></i></div>
+      }
+    </div>
   }
 </section>
