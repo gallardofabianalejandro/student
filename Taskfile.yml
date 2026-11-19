@@ -94,10 +94,18 @@ tasks:
       - "{{.NPM}} run install-browsers"
 
   e2e:
-    desc: "Pruebas de punta a punta contra BASE_URL (por defecto http://localhost:8080; la app tiene que estar corriendo)"
+    desc: "Pruebas de punta a punta. Ambiente en e2e/environments.json: task e2e (local) o task e2e E2E_ENV=render"
     dir: e2e
+    env:
+      E2E_ENV: '{{default "local" .E2E_ENV}}'
     cmds:
       - "{{.NPM}} test"
+
+  e2e_report:
+    desc: Abre el reporte HTML de la ultima corrida de e2e en el navegador (Ctrl+C para cerrarlo)
+    dir: e2e
+    cmds:
+      - "{{.NPM}} run report"
 
   new_entity:
     desc: "Genera un CRUD completo. Ej: task new_entity -- Alumno nombre:String edad:Integer email:String?"
