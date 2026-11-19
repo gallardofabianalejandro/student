@@ -4,14 +4,28 @@ services:
   - type: web
     name: student
     runtime: image
+    plan: free
     image:
-      url: docker.io/gallardofabian/student:latest
+      url: docker.io/gallardofabian/student:0.0.1-SNAPSHOT
     healthCheckPath: /actuator/health/readiness
     envVars:
       - key: SPRING_PROFILES_ACTIVE
         value: production
+      # Plan free: 512 MB y 0,1 CPU. Serial GC y pocos hilos del compilador para que la JVM entre y arranque.
+      - key: JAVA_TOOL_OPTIONS
+        value: "-XX:MaxRAMPercentage=65 -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss512k"
+      # En Render no hay colector OTLP: sin esto las metricas fallan a cada intervalo contra localhost.
+      - key: MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED
+        value: "false"
+      # Sin Config Server en Render: sin esto intenta conectarse a localhost:8888 al arrancar.
+      - key: SPRING_CLOUD_CONFIG_ENABLED
+        value: "false"
       - key: JWT_SECRET
         generateValue: true
+      # Solo para pruebas: fuera de local el registro esta cerrado y sin esto nadie puede crear el primer usuario.
+      # Quitar esta variable (o ponerla en false) cuando ya haya usuarios.
+      - key: APP_AUTH_REGISTRATION_ENABLED
+        value: "true"
       - key: DB_HOST
         fromDatabase:
           name: student-db

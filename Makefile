@@ -10,10 +10,10 @@ run:
 	mvn -B spring-boot:run -Dspring-boot.run.profiles=local
 
 image:
-	mvn -B jib:dockerBuild
+	mvn -B -DskipTests package jib:dockerBuild
 
 push:
-	mvn -B jib:build
+	mvn -B -DskipTests package jib:build
 
 format:
 	mvn -B spotless:apply

@@ -41,12 +41,12 @@ tasks:
   build_image:
     desc: Construye la imagen con Jib (IMAGE_NAME configurable)
     cmds:
-      - "{{.MVN}} -B -DskipTests jib:dockerBuild -Djib.to.image={{.IMAGE_NAME}}:{{.VERSION}}"
+      - "{{.MVN}} -B -DskipTests package jib:dockerBuild -Djib.to.image={{.IMAGE_NAME}}:{{.VERSION}}"
 
   push_image:
     desc: Construye y publica la imagen (requiere login previo al registry)
     cmds:
-      - "{{.MVN}} -B -DskipTests jib:build -Djib.to.image={{.IMAGE_NAME}}:{{.VERSION}}"
+      - "{{.MVN}} -B -DskipTests package jib:build -Djib.to.image={{.IMAGE_NAME}}:{{.VERSION}}"
 
   local-up:
     desc: Levanta las dependencias locales (compose.yml)
