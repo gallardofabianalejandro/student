@@ -15,5 +15,6 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('./pages/items/items').then((m) => m.Items),
   },
-  { path: '**', redirectTo: '' },
+  { path: 'error', loadComponent: () => import('./pages/server-error/server-error').then((m) => m.ServerError) },
+  { path: '**', loadComponent: () => import('./pages/not-found/not-found').then((m) => m.NotFound) },
 ];
