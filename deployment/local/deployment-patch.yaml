@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: student
+spec:
+  replicas: 1
+  template:
+    spec:
+      initContainers:
+        # Espera a Postgres: sin esto, en la primera corrida student arranca antes que la base,
+        # termina con codigo 1 y skaffold lo toma como fallo definitivo.
+        - name: wait-for-postgres
+          image: postgres:16-alpine
+          command: ["sh", "-c", "until pg_isready -h postgres -p 5432; do echo esperando postgres; sleep 2; done"]
+          resources:
+            requests:
+              cpu: 10m
+              memory: 16Mi
+            limits:
+              memory: 64Mi
+      containers:
+        - name: student
+          env:
+            # JDK_JAVA_OPTIONS y no JAVA_TOOL_OPTIONS: Cloud Code agrega ahi el JDWP del debug.
+            - name: JDK_JAVA_OPTIONS
+              value: "-XX:MaxRAMPercentage=65 -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss512k"
+            - name: MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED
+              value: "false"
+            - name: SPRING_CLOUD_CONFIG_ENABLED
+              value: "false"
+            - name: APP_AUTH_REGISTRATION_ENABLED
+              value: "true"
+          resources:
+            requests:
+              cpu: 250m
+              memory: 384Mi
+            limits:
+              memory: 768Mi
+          startupProbe:
+            httpGet:
+              path: /actuator/health
+              port: 8080
+            failureThreshold: 90
+            periodSeconds: 2
