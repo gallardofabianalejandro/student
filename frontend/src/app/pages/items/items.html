@@ -11,26 +11,60 @@
     {{ message }}
   </p>
 }
+@if (notice(); as message) {
+  <p role="status" class="notice" style="margin-bottom: 20px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12.5l2.7 2.7L16 9.5"/></svg>
+    {{ message }}
+  </p>
+}
 
 <section class="card" aria-labelledby="form-title">
   <h2 id="form-title" style="margin-bottom: 16px">{{ editingId() ? 'Editar item' : 'Nuevo item' }}</h2>
   <form [formGroup]="form" (ngSubmit)="submit()" class="form-grid">
-    <label class="field" for="name">
-      Nombre
-      <input id="name" formControlName="name" class="input" />
-    </label>
-    <label class="field" for="description">
-      Descripción
-      <input id="description" formControlName="description" class="input" />
-    </label>
-    <label class="field" for="quantity">
-      Cantidad
-      <input id="quantity" type="number" min="0" formControlName="quantity" class="input" />
-    </label>
-    <label class="field" for="price">
-      Precio
-      <input id="price" type="number" min="0" step="0.01" formControlName="price" class="input" />
-    </label>
+    <div>
+      <label class="field" for="name">
+        Nombre
+        <input id="name" #nameInput formControlName="name" class="input"
+               [attr.aria-invalid]="fieldError('name') ? 'true' : null"
+               [attr.aria-describedby]="fieldError('name') ? 'name-error' : null" />
+      </label>
+      @if (fieldError('name'); as message) {
+        <p id="name-error" class="field-error">{{ message }}</p>
+      }
+    </div>
+    <div>
+      <label class="field" for="description">
+        Descripción
+        <input id="description" formControlName="description" class="input"
+               [attr.aria-invalid]="fieldError('description') ? 'true' : null"
+               [attr.aria-describedby]="fieldError('description') ? 'description-error' : null" />
+      </label>
+      @if (fieldError('description'); as message) {
+        <p id="description-error" class="field-error">{{ message }}</p>
+      }
+    </div>
+    <div>
+      <label class="field" for="quantity">
+        Cantidad
+        <input id="quantity" type="number" min="0" formControlName="quantity" class="input"
+               [attr.aria-invalid]="fieldError('quantity') ? 'true' : null"
+               [attr.aria-describedby]="fieldError('quantity') ? 'quantity-error' : null" />
+      </label>
+      @if (fieldError('quantity'); as message) {
+        <p id="quantity-error" class="field-error">{{ message }}</p>
+      }
+    </div>
+    <div>
+      <label class="field" for="price">
+        Precio
+        <input id="price" type="number" min="0" step="0.01" formControlName="price" class="input"
+               [attr.aria-invalid]="fieldError('price') ? 'true' : null"
+               [attr.aria-describedby]="fieldError('price') ? 'price-error' : null" />
+      </label>
+      @if (fieldError('price'); as message) {
+        <p id="price-error" class="field-error">{{ message }}</p>
+      }
+    </div>
     <div class="full">
       <button type="submit" [disabled]="form.invalid || loading()" class="btn btn-primary">
         {{ editingId() ? 'Guardar cambios' : 'Crear' }}
@@ -56,15 +90,15 @@
       <div class="table-wrap">
         <table>
           <thead>
-            <tr><th>Nombre</th><th>Descripción</th><th class="num">Cantidad</th><th class="num">Precio</th><th></th></tr>
+            <tr><th>Nombre</th><th>Descripción</th><th class="num">Cantidad</th><th class="num">Precio</th><th><span class="sr-only">Acciones</span></th></tr>
           </thead>
           <tbody>
             @for (item of page.content; track item.id) {
               <tr>
                 <td class="name">{{ item.name }}</td>
-                <td class="muted">{{ item.description }}</td>
-                <td class="num">{{ item.quantity }}</td>
-                <td class="num">{{ item.price }}</td>
+                <td class="muted" data-label="Descripción">{{ item.description }}</td>
+                <td class="num" data-label="Cantidad">{{ item.quantity | number: '1.0-0' }}</td>
+                <td class="num" data-label="Precio">{{ item.price | currency: currency : 'symbol-narrow' : '1.2-2' }}</td>
                 <td class="actions">
                   @if (pendingRemoval()?.id === item.id) {
                     <span class="confirm">

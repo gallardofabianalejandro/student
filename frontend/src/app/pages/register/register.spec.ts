@@ -28,6 +28,23 @@ describe('Register', () => {
     return (fixture.nativeElement as HTMLElement).querySelector('[role="alert"]')?.textContent?.trim() ?? '';
   }
 
+  function textAfterTouching(values: { username: string; password: string }): string {
+    const fixture = TestBed.createComponent(Register);
+    fixture.detectChanges();
+    fixture.componentInstance['form'].setValue(values);
+    fixture.componentInstance['form'].markAllAsTouched();
+    fixture.detectChanges();
+    return (fixture.nativeElement as HTMLElement).textContent ?? '';
+  }
+
+  it('fieldError_whenPasswordIsShort_thenSaysTheMinimumLength', () => {
+    expect(textAfterTouching({ username: 'ana', password: 'corta' })).toContain('al menos 8 caracteres');
+  });
+
+  it('fieldError_whenUsernameIsEmpty_thenAsksForIt', () => {
+    expect(textAfterTouching({ username: '', password: 's3cret-pass' })).toContain('El usuario es obligatorio');
+  });
+
   it('submit_whenRegistrationDisabled_thenExplainsItIsNotEnabled', () => {
     expect(submitFailingWith(404)).toContain('no está habilitado');
   });
