@@ -20,11 +20,11 @@ export const errorPageInterceptor: HttpInterceptorFn = (req, next) => {
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
         // replaceUrl: la pantalla que fallo no queda en el historial, asi "Atras" no devuelve al usuario
-        // a la misma carga que vuelve a fallar. "from" permite que /error ofrezca reintentar esa pantalla.
+        // a la misma carga que vuelve a fallar. "from" permite que /server-error ofrezca reintentar esa pantalla.
         if (error.status === 403) {
           router.navigateByUrl('/forbidden', { replaceUrl: true });
         } else if (error.status >= 500 && req.method === 'GET') {
-          router.navigateByUrl('/error', { replaceUrl: true, state: { from: router.url } });
+          router.navigateByUrl('/server-error', { replaceUrl: true, state: { from: router.url } });
         }
       }
       return throwError(() => error);

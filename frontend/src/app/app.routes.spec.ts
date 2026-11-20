@@ -34,7 +34,7 @@ describe('routes', () => {
   });
 
   it('navigate_whenErrorPath_thenShowsServerErrorPage', async () => {
-    const page = await visit('/error');
+    const page = await visit('/server-error');
 
     expect(page.textContent).toContain('500');
   });

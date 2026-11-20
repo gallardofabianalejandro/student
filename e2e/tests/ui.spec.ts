@@ -1,8 +1,9 @@
 import {expect, test} from '@playwright/test';
-import {signInWithoutBackend} from './support';
+import {navigateInApp, signInWithoutBackend} from './support';
 
 test('rutaDesconocida_whenVisited_thenShowsNotFoundPageWithWayHome', async ({page}) => {
-    await page.goto('/esta-ruta-no-existe');
+    await page.goto('/');
+    await navigateInApp(page, '/esta-ruta-no-existe');
 
     await expect(page.getByRole('heading', {name: 'No encontramos esa página'})).toBeVisible();
     await page.getByRole('link', {name: 'Volver al inicio'}).click();
@@ -28,7 +29,7 @@ test('items_whenLoadFailsWith500_thenShowsErrorPageAndBackDoesNotTrapTheUser', a
     await page.goto('/dashboard');
 
     await page.getByRole('link', {name: 'Items', exact: true}).click();
-    await expect(page).toHaveURL(/\/error$/);
+    await expect(page).toHaveURL(/\/server-error$/);
     await expect(page.getByRole('heading', {name: /Algo salió mal/})).toBeVisible();
 
     await page.goBack();
@@ -45,7 +46,7 @@ test('items_whenApiRecoversAfterAnError_thenRetryReloadsTheList', async ({page})
     );
     await page.goto('/dashboard');
     await page.getByRole('link', {name: 'Items', exact: true}).click();
-    await expect(page).toHaveURL(/\/error$/);
+    await expect(page).toHaveURL(/\/server-error$/);
 
     failing = false;
     await page.getByRole('button', {name: 'Reintentar'}).click();

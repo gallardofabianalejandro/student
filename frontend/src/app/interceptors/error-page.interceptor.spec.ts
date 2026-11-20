@@ -45,13 +45,13 @@ describe('errorPageInterceptor', () => {
   it('intercept_whenALoadFailsWith500_thenReplacesTheHistoryEntryAndRemembersWhereItCameFrom', () => {
     fail('GET', '/api/v1/sample-items', 500);
 
-    expect(navigate).toHaveBeenCalledWith('/error', { replaceUrl: true, state: { from: '/' } });
+    expect(navigate).toHaveBeenCalledWith('/server-error', { replaceUrl: true, state: { from: '/' } });
   });
 
   it('intercept_whenALoadFailsWith503_thenGoesToErrorPage', () => {
     fail('GET', '/api/v1/sample-items', 503);
 
-    expect(navigate).toHaveBeenCalledWith('/error', { replaceUrl: true, state: { from: '/' } });
+    expect(navigate).toHaveBeenCalledWith('/server-error', { replaceUrl: true, state: { from: '/' } });
   });
 
   it('intercept_whenAMutationFailsWith500_thenStaysOnThePageSoTheFormIsNotLost', () => {

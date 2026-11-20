@@ -15,6 +15,17 @@ export const sampleItems: SampleItem[] = [
 ];
 
 /**
+ * Navega dentro de la app sin pedirle la URL al servidor, como un clic en un enlace. Las rutas que Angular no
+ * conoce no se piden directo: el backend entrega al SPA solo su lista de rutas (AngularForwardController).
+ */
+export async function navigateInApp(page: Page, path: string) {
+    await page.evaluate((target) => {
+        history.pushState({}, '', target);
+        window.dispatchEvent(new PopStateEvent('popstate', {state: {}}));
+    }, path);
+}
+
+/**
  * Sesion simulada en el navegador, para los tests que verifican como reacciona la pantalla (errores de la API,
  * diseno, accesibilidad) sin depender del backend ni de la base. El login real lo cubre items.spec.ts.
  *

@@ -37,7 +37,7 @@ class SpaRoutingTest {
 
     @Test
     void spaRoutes_whenRequestedWithoutToken_thenForwardToIndex() throws Exception {
-        for (String route : new String[]{"/login", "/register", "/dashboard", "/dashboard/profile", "/items"}) {
+        for (String route : new String[]{"/login", "/register", "/dashboard", "/dashboard/profile", "/items", "/forbidden", "/server-error"}) {
             mockMvc.perform(get(route)).andExpect(status().isOk()).andExpect(forwardedUrl("/index.html"));
         }
     }

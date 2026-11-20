@@ -1,6 +1,6 @@
 import AxeBuilder from '@axe-core/playwright';
 import {expect, Page, test} from '@playwright/test';
-import {sampleItems, signInWithoutBackend} from './support';
+import {navigateInApp, sampleItems, signInWithoutBackend} from './support';
 
 // Contraste de color, nombres accesibles y estructura (WCAG 2.1 A y AA) en cada pantalla y en los dos temas.
 // Si alguien cambia un color y deja de leerse, falla aca.
@@ -10,8 +10,8 @@ const screens = [
     {name: 'inicio', url: '/', signedIn: false},
     {name: 'login', url: '/login', signedIn: false},
     {name: 'registro', url: '/register', signedIn: false},
-    {name: '404', url: '/ruta-que-no-existe', signedIn: false},
-    {name: '500', url: '/error', signedIn: false},
+    {name: '404', url: '/', inApp: '/ruta-que-no-existe', signedIn: false},
+    {name: '500', url: '/server-error', signedIn: false},
     {name: '403', url: '/forbidden', signedIn: true},
     {name: 'dashboard', url: '/dashboard', signedIn: true},
     {name: 'items', url: '/items', signedIn: true},
@@ -22,7 +22,7 @@ async function violations(page: Page): Promise<string[]> {
     return results.violations.map((v) => `${v.id} (${v.impact}): ${v.help} -> ${v.nodes.map((n) => n.target.join(' ')).join(' | ')}`);
 }
 
-async function open(page: Page, theme: string, url: string, signedIn: boolean) {
+async function open(page: Page, theme: string, url: string, signedIn: boolean, inApp?: string) {
     await page.addInitScript((t) => localStorage.setItem('theme', t), theme);
     if (signedIn) {
         await signInWithoutBackend(page, sampleItems);
@@ -31,13 +31,16 @@ async function open(page: Page, theme: string, url: string, signedIn: boolean) {
     }
     await page.goto(url);
     await page.waitForLoadState('networkidle');
+    if (inApp) {
+        await navigateInApp(page, inApp);
+    }
     await expect.poll(() => page.evaluate(() => document.documentElement.dataset['theme'])).toBe(theme);
 }
 
 for (const theme of themes) {
     for (const screen of screens) {
         test(`accesibilidad_${screen.name}_${theme}_thenHasNoViolations`, async ({page}) => {
-            await open(page, theme, screen.url, screen.signedIn);
+            await open(page, theme, screen.url, screen.signedIn, screen.inApp);
 
             expect(await violations(page)).toEqual([]);
         });

@@ -27,7 +27,7 @@ export const routes: Routes = [
     loadComponent: () => import('./pages/forbidden/forbidden').then((m) => m.Forbidden),
   },
   {
-    path: 'error',
+    path: 'server-error',
     title: 'Error del servidor',
     loadComponent: () => import('./pages/server-error/server-error').then((m) => m.ServerError),
   },
