@@ -21,6 +21,18 @@ describe('routes', () => {
     expect(page.textContent).toContain('404');
   });
 
+  it('navigate_whenForbiddenPath_thenShowsForbiddenPage', async () => {
+    const page = await visit('/forbidden');
+
+    expect(page.textContent).toContain('403');
+  });
+
+  it('routes_whenDeclared_thenEveryPageHasATitle', () => {
+    const untitled = routes.filter((r) => r.path !== '**' && !r.title && !r.redirectTo).map((r) => r.path);
+
+    expect(untitled).toEqual([]);
+  });
+
   it('navigate_whenErrorPath_thenShowsServerErrorPage', async () => {
     const page = await visit('/error');
 
