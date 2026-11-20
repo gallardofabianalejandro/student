@@ -1,4 +1,5 @@
-import {expect, Page, test} from '@playwright/test';
+import {expect, test} from '@playwright/test';
+import {signInWithoutBackend} from './support';
 
 test('rutaDesconocida_whenVisited_thenShowsNotFoundPageWithWayHome', async ({page}) => {
     await page.goto('/esta-ruta-no-existe');
@@ -21,16 +22,6 @@ test('tema_whenToggled_thenChangesAndSurvivesReload', async ({page}) => {
     await page.reload();
     await expect.poll(theme).toBe('dark');
 });
-
-// Sesion simulada en el navegador: estos tests verifican como reacciona la pantalla a los errores de la API,
-// no el login real (eso lo cubre items.spec.ts), asi que no dependen del backend ni de la base.
-async function signInWithoutBackend(page: Page, itemsStatus: number | null) {
-    await page.route('**/api/auth/refresh', (route) => route.fulfill({json: {accessToken: 'e2e'}}));
-    await page.route('**/api/auth/me', (route) => route.fulfill({json: {username: 'ana', roles: ['USER']}}));
-    if (itemsStatus !== null) {
-        await page.route('**/api/v1/sample-items*', (route) => route.fulfill({status: itemsStatus, json: {}}));
-    }
-}
 
 test('items_whenLoadFailsWith500_thenShowsErrorPageAndBackDoesNotTrapTheUser', async ({page}) => {
     await signInWithoutBackend(page, 500);

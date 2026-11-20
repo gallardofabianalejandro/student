@@ -45,6 +45,8 @@ test('flujo_whenRegisterLoginAndCrud_thenEveryStepWorks', async ({page}) => {
     await test.step('crear un item', async () => {
         await createItem(name);
         await expect(page.getByRole('row', {name: new RegExp(name)})).toBeVisible();
+        await expect(page.getByRole('status')).toContainText('Item creado');
+        await expect(page.getByRole('row', {name: new RegExp(name)})).toContainText('$ 9,50');
     });
 
     await test.step('un nombre repetido se rechaza', async () => {
