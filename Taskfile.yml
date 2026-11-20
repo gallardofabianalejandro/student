@@ -123,6 +123,12 @@ tasks:
     cmds:
       - "{{.MVN}} -B -ntp versions:display-dependency-updates"
 
+  sbom:
+    desc: Genera el SBOM CycloneDX en target/bom.json (inventario de dependencias; no es un escaneo de vulnerabilidades)
+    cmds:
+      - "{{.MVN}} -B -ntp org.cyclonedx:cyclonedx-maven-plugin:2.9.1:makeBom"
+      - 'echo "SBOM: target/bom.json"'
+
   doctor:
     desc: Muestra las versiones de las herramientas (Java, Maven, Docker, Node)
     cmds:
