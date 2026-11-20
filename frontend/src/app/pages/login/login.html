@@ -1,23 +1,38 @@
-<section class="mx-auto max-w-sm">
-  <h1 class="text-2xl font-bold">Ingresar</h1>
-  <form [formGroup]="form" (ngSubmit)="submit()" class="mt-6 space-y-4">
-    <label class="block text-sm">
-      Usuario
-      <input formControlName="username" autocomplete="username"
-             class="mt-1 w-full rounded border border-slate-300 px-3 py-2" />
-    </label>
-    <label class="block text-sm">
-      Contraseña
-      <input type="password" formControlName="password" autocomplete="current-password"
-             class="mt-1 w-full rounded border border-slate-300 px-3 py-2" />
-    </label>
+<section class="card card-auth">
+  <h1>Ingresar</h1>
+  <p class="muted" style="margin-top: 6px">Entrá con tu usuario para continuar.</p>
+  <form [formGroup]="form" (ngSubmit)="submit()" class="stack" style="margin-top: 24px">
+    <div>
+      <label class="field" for="username">
+        Usuario
+        <input id="username" formControlName="username" autocomplete="username" class="input"
+               [attr.aria-invalid]="fieldError('username') ? 'true' : null"
+               [attr.aria-describedby]="fieldError('username') ? 'username-error' : null" />
+      </label>
+      @if (fieldError('username'); as message) {
+        <p id="username-error" class="field-error">{{ message }}</p>
+      }
+    </div>
+    <div>
+      <label class="field" for="password">
+        Contraseña
+        <input id="password" type="password" formControlName="password" autocomplete="current-password" class="input"
+               [attr.aria-invalid]="fieldError('password') ? 'true' : null"
+               [attr.aria-describedby]="fieldError('password') ? 'password-error' : null" />
+      </label>
+      @if (fieldError('password'); as message) {
+        <p id="password-error" class="field-error">{{ message }}</p>
+      }
+    </div>
     @if (error(); as message) {
-      <p role="alert" class="rounded bg-red-50 px-3 py-2 text-sm text-red-700">{{ message }}</p>
+      <p role="alert" class="alert">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+        {{ message }}
+      </p>
     }
-    <button type="submit" [disabled]="form.invalid || loading()"
-            class="w-full rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700 disabled:opacity-50">
+    <button type="submit" [disabled]="form.invalid || loading()" class="btn btn-primary btn-block">
       {{ loading() ? 'Ingresando…' : 'Ingresar' }}
     </button>
   </form>
-  <p class="mt-4 text-sm text-slate-600">¿No tenés cuenta? <a routerLink="/register" class="underline">Registrate</a></p>
+  <p class="muted" style="margin-top: 20px; font-size: 14px">¿No tenés cuenta? <a routerLink="/register">Registrate</a></p>
 </section>

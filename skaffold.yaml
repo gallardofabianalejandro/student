@@ -1,0 +1,31 @@
+# Desarrollo local en Kubernetes (Cloud Code / skaffold dev) contra minikube. Los manifiestos de GKE (deployment/base) no se tocan.
+apiVersion: skaffold/v4beta11
+kind: Config
+metadata:
+  name: student
+build:
+  local:
+    push: false
+  artifacts:
+    - image: gallardofabian/student
+      # jib:dockerBuild no corre "package": sin esto la imagen sale sin el front Angular (404 en /).
+      hooks:
+        before:
+          - command: ["cmd", "/c", "mvn", "-B", "-DskipTests", "package"]
+            os: [windows]
+          - command: ["mvn", "-B", "-DskipTests", "package"]
+            os: [linux, darwin]
+      jib:
+        type: maven
+        args: ["-DskipTests"]
+manifests:
+  kustomize:
+    paths:
+      - deployment/local
+deploy:
+  kubectl: {}
+portForward:
+  - resourceType: service
+    resourceName: student
+    port: 80
+    localPort: 8080

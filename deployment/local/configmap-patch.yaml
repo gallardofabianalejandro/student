@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: student-config
+data:
+  DB_URL: jdbc:postgresql://postgres:5432/student
+  TRACING_ENABLED: "false"
+  TRACES_EXPORT_URL: http://localhost:4318/v1/traces
+  METRICS_EXPORT_URL: http://localhost:4318/v1/metrics
+  LOGS_EXPORT_URL: http://localhost:4318/v1/logs

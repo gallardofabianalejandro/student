@@ -1,13 +1,27 @@
-<section>
-  <h1 class="text-2xl font-bold">Dashboard</h1>
+<div class="page-head">
+  <div>
+    <h1>Dashboard</h1>
+    @if (auth.user(); as user) {
+      <p class="muted" style="margin-top: 6px">Sesión iniciada como <strong style="color: var(--fg)">{{ user.username }}</strong>.</p>
+    }
+  </div>
+</div>
+
+<div class="grid-cards">
   @if (auth.user(); as user) {
-    <p class="mt-4">Sesión iniciada como <strong>{{ user.username }}</strong>.</p>
-    <ul class="mt-3 flex flex-wrap gap-2">
-      @for (role of user.roles; track role) {
-        <li class="rounded bg-slate-200 px-2 py-0.5 text-xs font-medium">{{ role }}</li>
-      }
-    </ul>
+    <section class="card stack" style="background-image: var(--grad-soft)">
+      <h2>Tu sesión</h2>
+      <p class="muted" style="font-size: 14px">Roles asignados a tu usuario</p>
+      <ul class="roles">
+        @for (role of user.roles; track role) {
+          <li><span class="badge">{{ role }}</span></li>
+        }
+      </ul>
+    </section>
   }
-  <p class="mt-6"><a class="rounded bg-slate-900 px-4 py-2 text-white hover:bg-slate-700" routerLink="/items">Ir a
-    Items</a></p>
-</section>
+  <section class="card stack">
+    <h2>Items</h2>
+    <p class="muted" style="font-size: 14px">Creá, editá y eliminá los items de ejemplo.</p>
+    <a class="btn btn-primary" routerLink="/items">Ir a Items</a>
+  </section>
+</div>

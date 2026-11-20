@@ -1,9 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
+import { LOCALE_ID } from '@angular/core';
+import { registerLocaleData } from '@angular/common';
+import localeEsAr from '@angular/common/locales/es-AR';
 import { of, throwError } from 'rxjs';
 import { Item, ItemPage } from '../../models/item.model';
 import { ItemService } from '../../services/item.service';
 import { Items } from './items';
+
+registerLocaleData(localeEsAr);
 
 describe('Items', () => {
   const caja: Item = { id: 'id-1', name: 'caja', description: 'chica', quantity: 3, price: 9.5 };
@@ -21,7 +26,10 @@ describe('Items', () => {
   beforeEach(() => {
     Object.values(service).forEach((fn) => fn.mockReset());
     service.list.mockReturnValue(of(pageOf([caja])));
-    TestBed.configureTestingModule({ imports: [Items], providers: [{ provide: ItemService, useValue: service }] });
+    TestBed.configureTestingModule({
+      imports: [Items],
+      providers: [{ provide: ItemService, useValue: service }, { provide: LOCALE_ID, useValue: 'es-AR' }],
+    });
   });
 
   function create() {
@@ -135,5 +143,108 @@ describe('Items', () => {
     fixture.componentInstance.previous();
 
     expect(service.list).toHaveBeenCalledTimes(1);
+  });
+
+  const query = (fixture: { nativeElement: unknown }, selector: string) =>
+    (fixture.nativeElement as HTMLElement).querySelector(selector);
+  const fill = (
+    fixture: ReturnType<typeof create>,
+    value: Partial<{ name: string; description: string; quantity: number; price: number }>,
+  ) =>
+    fixture.componentInstance['form'].setValue({ name: 'x', description: '', quantity: 1, price: 1, ...value });
+
+  it('render_whenPriceAndQuantityAreBig_thenUsesArgentineFormat', () => {
+    service.list.mockReturnValue(of(pageOf([{ ...caja, quantity: 1234, price: 68900 }])));
+
+    const content = text(create());
+
+    expect(content).toContain('68.900,00');
+    expect(content).toContain('1.234');
+  });
+
+  it('render_whenThereAreItems_thenEveryCellHasALabelForTheCardLayout', () => {
+    const fixture = create();
+
+    expect(query(fixture, 'td[data-label="Precio"]')).not.toBeNull();
+    expect(query(fixture, 'td[data-label="Cantidad"]')).not.toBeNull();
+  });
+
+  it.each([
+    ['created', 'Item creado'],
+    ['updated', 'Cambios guardados'],
+    ['removed', 'Item eliminado'],
+  ])('notice_whenItem%s_thenAnnouncesItWithoutUsingTheErrorAlert', (action, expected) => {
+    service.create.mockReturnValue(of(caja));
+    service.update.mockReturnValue(of(caja));
+    service.remove.mockReturnValue(of(undefined));
+    const fixture = create();
+
+    if (action === 'created') {
+      fill(fixture, {});
+      fixture.componentInstance.submit();
+    } else if (action === 'updated') {
+      fixture.componentInstance.edit(caja);
+      fixture.componentInstance.submit();
+    } else {
+      fixture.componentInstance.askRemove(caja);
+      fixture.componentInstance.confirmRemove();
+    }
+    fixture.detectChanges();
+
+    expect(query(fixture, '[role="status"]')?.textContent).toContain(expected);
+    expect(alert(fixture)).toBe('');
+  });
+
+  it('notice_whenTheNextOperationFails_thenTheSuccessMessageIsCleared', () => {
+    service.create.mockReturnValueOnce(of(caja));
+    const fixture = create();
+    fill(fixture, {});
+    fixture.componentInstance.submit();
+    service.create.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 409 })));
+
+    fill(fixture, {});
+    fixture.componentInstance.submit();
+    fixture.detectChanges();
+
+    expect(query(fixture, '[role="status"]')).toBeNull();
+    expect(alert(fixture)).toContain('Ya existe');
+  });
+
+  it('fieldError_whenNameIsTouchedAndEmpty_thenAsksForIt', () => {
+    const fixture = create();
+    fixture.componentInstance['form'].controls.name.markAsTouched();
+    fixture.detectChanges();
+
+    expect(text(fixture)).toContain('El nombre es obligatorio');
+    expect(query(fixture, '#name')?.getAttribute('aria-invalid')).toBe('true');
+  });
+
+  it('fieldError_whenNothingWasTouched_thenShowsNoMessages', () => {
+    const fixture = create();
+
+    expect(text(fixture)).not.toContain('es obligatorio');
+    expect(query(fixture, '#name')?.getAttribute('aria-invalid')).not.toBe('true');
+  });
+
+  it.each([
+    ['quantity', 'La cantidad no puede ser negativa'],
+    ['price', 'El precio no puede ser negativo'],
+  ])('fieldError_whenTouched%sIsNegative_thenExplainsIt', (field, expected) => {
+    const fixture = create();
+    fill(fixture, { [field]: -1 });
+    fixture.componentInstance['form'].get(field)?.markAsTouched();
+    fixture.detectChanges();
+
+    expect(text(fixture)).toContain(expected);
+  });
+
+  it('edit_whenCalled_thenFocusesTheNameFieldSoTheFormIsInView', () => {
+    const fixture = create();
+    document.body.appendChild(fixture.nativeElement as HTMLElement);
+
+    fixture.componentInstance.edit(caja);
+
+    expect(document.activeElement?.id).toBe('name');
+    (fixture.nativeElement as HTMLElement).remove();
   });
 });

@@ -2,7 +2,13 @@ import { HttpErrorResponse } from '@angular/common/http';
 import { Component, inject, signal } from '@angular/core';
 import { NonNullableFormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { fieldError } from '../../forms/field-error';
 import { AuthService } from '../../services/auth.service';
+
+const FIELD_MESSAGES = {
+  username: { required: 'Ingresá tu usuario.' },
+  password: { required: 'Ingresá tu contraseña.' },
+} as const;
 
 @Component({
   selector: 'app-login',
@@ -20,6 +26,10 @@ export class Login {
   });
   protected readonly error = signal<string | null>(null);
   protected readonly loading = signal(false);
+
+  protected fieldError(field: 'username' | 'password'): string | null {
+    return fieldError(this.form.controls[field], FIELD_MESSAGES[field]);
+  }
 
   submit(): void {
     if (this.form.invalid || this.loading()) {

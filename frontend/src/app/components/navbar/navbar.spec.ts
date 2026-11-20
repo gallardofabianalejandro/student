@@ -23,6 +23,8 @@ describe('Navbar', () => {
   }
 
   const text = (f: ReturnType<typeof setup>) => (f.nativeElement as HTMLElement).textContent ?? '';
+  const buttons = (f: ReturnType<typeof setup>) =>
+    Array.from((f.nativeElement as HTMLElement).querySelectorAll('button'));
 
   it('render_whenAnonymous_thenOffersLoginAndRegisterOnly', () => {
     const fixture = setup(null);
@@ -46,10 +48,26 @@ describe('Navbar', () => {
     const fixture = setup({ username: 'ana', roles: ['USER'] });
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
 
-    const button = (fixture.nativeElement as HTMLElement).querySelector('button') as HTMLButtonElement;
+    const button = buttons(fixture).find((b) => b.textContent?.includes('Salir')) as HTMLButtonElement;
     button.click();
 
     expect(logout).toHaveBeenCalledOnce();
     expect(navigate).toHaveBeenCalledWith('/');
+  });
+
+  it('themeToggle_whenAnonymous_thenIsAvailableAndSwitchesTheTheme', () => {
+    localStorage.setItem('theme', 'light');
+    const fixture = setup(null);
+    const toggle = buttons(fixture).find((b) => b.getAttribute('aria-label') === 'Cambiar tema') as HTMLButtonElement;
+
+    toggle.click();
+
+    expect(document.documentElement.getAttribute('data-theme')).toBe('dark');
+  });
+
+  it('themeToggle_whenAuthenticated_thenIsAvailableToo', () => {
+    const fixture = setup({ username: 'ana', roles: ['USER'] });
+
+    expect(buttons(fixture).some((b) => b.getAttribute('aria-label') === 'Cambiar tema')).toBe(true);
   });
 });

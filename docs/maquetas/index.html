@@ -1,0 +1,52 @@
+<title>Maquetas de interfaz</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Sora:wght@600;700;800&display=swap">
+<link rel="stylesheet" href="maqueta.css">
+<meta name="claude:viewport-fit-sides" content="cover">
+<script src="maqueta.js" defer></script>
+<style>
+  .shot { display: block; text-decoration: none; color: inherit; }
+  .shot .thumb { aspect-ratio: 16 / 9; border-radius: 12px; border: 1px solid var(--line); background: var(--grad-soft), var(--surface-2); display: grid; place-items: center; font: 800 1.6rem var(--font-display); overflow: hidden; }
+  .shot h3 { font-size: 16px; margin-top: 14px; }
+  .shot p { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .shot .meta { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; align-items: center; font-size: 12.5px; color: var(--muted); }
+  .shot:hover .card, .shot .card:hover { border-color: var(--ga); }
+  .tokens { display: flex; flex-wrap: wrap; gap: 10px; }
+  .sw { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--muted); }
+  .sw i { width: 22px; height: 22px; border-radius: 7px; border: 1px solid var(--line); display: inline-block; }
+</style>
+
+<main class="wrap" style="--w:68rem">
+  <div class="page-head">
+    <div>
+      <span class="badge">Rama feat/maquetas-ui</span>
+      <h1 style="margin-top:12px">Maquetas de <span class="grad-text">interfaz</span></h1>
+      <p class="muted" style="margin-top:8px;max-width:40rem">8 pantallas del front Angular rediseñadas con degradados verdes, en modo claro y oscuro y tres paletas a elección. Abrilas, cambiá el tema y los estados, y marcá cuáles aprobás antes de portarlas.</p>
+    </div>
+    <button class="icon-btn" type="button" data-theme-toggle aria-label="Cambiar tema">
+      <svg class="i-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      <svg class="i-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    </button>
+  </div>
+
+  <div class="grid" style="grid-template-columns:repeat(auto-fill,minmax(16rem,1fr))">
+    <a class="shot" href="home.html"><div class="card"><div class="thumb grad-text">/</div><h3>Inicio</h3><p>Bienvenida con llamado a ingresar y tres características.</p><div class="meta"><span class="badge">Rediseño</span>ruta <code>/</code></div></div></a>
+    <a class="shot" href="login.html"><div class="card"><div class="thumb grad-text">Ingresar</div><h3>Ingresar</h3><p>Formulario centrado. Estados: normal, error, cargando.</p><div class="meta"><span class="badge">Rediseño</span>ruta <code>/login</code></div></div></a>
+    <a class="shot" href="register.html"><div class="card"><div class="thumb grad-text">Registro</div><h3>Crear cuenta</h3><p>Alta de usuario con ayuda de contraseña. Mismos estados.</p><div class="meta"><span class="badge">Rediseño</span>ruta <code>/register</code></div></div></a>
+    <a class="shot" href="dashboard.html"><div class="card"><div class="thumb grad-text">Dashboard</div><h3>Dashboard</h3><p>Saludo, roles de la sesión y acceso a Items.</p><div class="meta"><span class="badge">Rediseño</span>ruta <code>/dashboard</code></div></div></a>
+    <a class="shot" href="items.html"><div class="card"><div class="thumb grad-text">Items</div><h3>Items (listado y formulario)</h3><p>Formulario, tabla, confirmación de borrado y paginación. Estados: con datos, vacío, cargando, error.</p><div class="meta"><span class="badge">Rediseño</span>ruta <code>/items</code></div></div></a>
+    <a class="shot" href="404.html"><div class="card"><div class="thumb grad-text">404</div><h3>Página no encontrada</h3><p>Hoy cualquier ruta desconocida redirige al inicio. Esta pantalla lo reemplazaría.</p><div class="meta"><span class="badge">Nueva</span>ruta <code>**</code></div></div></a>
+    <a class="shot" href="500.html"><div class="card"><div class="thumb grad-text">500</div><h3>Error del servidor</h3><p>Pantalla para fallos inesperados, con reintento.</p><div class="meta"><span class="badge">Nueva</span>fallo de API</div></div></a>
+  </div>
+
+  <section class="card stack" style="margin-top:28px">
+    <h2>Decisiones de diseño</h2>
+    <div class="tokens" aria-label="Paleta">
+      <span class="sw"><i style="background:var(--grad)"></i>Degradado de la paleta</span>
+      <span class="sw"><i style="background:var(--bg)"></i>Fondo</span>
+      <span class="sw"><i style="background:var(--surface)"></i>Superficie</span>
+      <span class="sw"><i style="background:var(--danger-bg);border-color:var(--danger-line)"></i>Error</span>
+    </div>
+    <p class="muted" style="font-size:14.5px">Tipografías: Sora para títulos, Inter para texto. Los colores viven como tokens en <code>maqueta.css</code> y se pasan a <code>@theme</code> de Tailwind 4. Novedades frente a la app actual: botón de tema, barra más ancha en Items (68 rem) y páginas 404 y 500.</p>
+    <p class="muted" style="font-size:14.5px">Siguiente paso, una vez aprobadas: portarlas a Angular con tests primero y actualizar los e2e de Playwright. Aplica a <code>student</code> y al arquetipo.</p>
+  </section>
+</main>

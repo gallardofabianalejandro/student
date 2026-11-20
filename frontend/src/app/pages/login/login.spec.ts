@@ -94,6 +94,16 @@ describe('Login', () => {
     expect(fixture.componentInstance['loading']()).toBe(false);
   });
 
+  it('fieldError_whenFieldsAreTouchedAndEmpty_thenAsksForBoth', () => {
+    const fixture = setup();
+    fixture.componentInstance['form'].markAllAsTouched();
+    fixture.detectChanges();
+
+    const content = (fixture.nativeElement as HTMLElement).textContent ?? '';
+    expect(content).toContain('Ingresá tu usuario');
+    expect(content).toContain('Ingresá tu contraseña');
+  });
+
   it('submit_whenFormEmpty_thenDoesNotCallServer', () => {
     const fixture = setup();
 
