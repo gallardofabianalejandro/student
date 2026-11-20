@@ -249,7 +249,7 @@
                     <execution>
                         <id>check</id>
                         <configuration>
-                            <haltOnFailure>false</haltOnFailure>
+                            <haltOnFailure>true</haltOnFailure>
                             <rules combine.self="override">
                                 <rule>
                                     <element>PACKAGE</element>
