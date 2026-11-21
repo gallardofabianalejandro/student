@@ -4,12 +4,13 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.Objects;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Ejemplo de modelo de dominio -- reemplazar por las entidades reales del negocio. Record inmutable, sin Lombok y
  * sin dependencias externas (regla dura de domain/): las invariantes se validan en el constructor compacto.
  */
-public record SampleItem(UUID id, String name, String description, int quantity, BigDecimal price) {
+public record SampleItem(UUID id, String name, @Nullable String description, int quantity, BigDecimal price) {
 
     private static final int NAME_MAX = 100;
     private static final int DESCRIPTION_MAX = 500;
@@ -37,7 +38,7 @@ public record SampleItem(UUID id, String name, String description, int quantity,
         return new SampleItem(id, data.name(), data.description(), data.quantity(), data.price());
     }
 
-    private static String requiredText(String value, String field, int max) {
+    private static String requiredText(@Nullable String value, String field, int max) {
         if (value == null || value.isBlank()) {
             throw new IllegalArgumentException(field + " es obligatorio");
         }
@@ -48,7 +49,7 @@ public record SampleItem(UUID id, String name, String description, int quantity,
         return text;
     }
 
-    private static String optionalText(String value, String field, int max) {
+    private static @Nullable String optionalText(@Nullable String value, String field, int max) {
         return value == null || value.isBlank() ? null : requiredText(value, field, max);
     }
 }

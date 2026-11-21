@@ -5,11 +5,15 @@ import static com.tngtech.archunit.lang.syntax.ArchRuleDefinition.noClasses;
 
 import com.enofex.taikai.Taikai;
 import com.enofex.taikai.java.ImportsConfigurer;
+import com.tngtech.archunit.core.domain.JavaClass;
+import com.tngtech.archunit.core.domain.JavaPackage;
+import com.tngtech.archunit.core.importer.ClassFileImporter;
 import com.tngtech.archunit.core.importer.ImportOption;
 import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 import com.tngtech.archunit.library.GeneralCodingRules;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 
 @AnalyzeClasses(packages = "dev.fabian.gallardo.student", importOptions = ImportOption.DoNotIncludeTests.class)
@@ -61,6 +65,25 @@ class ArchitectureTest {
     static final ArchRule noGenericExceptions = GeneralCodingRules.NO_CLASSES_SHOULD_THROW_GENERIC_EXCEPTIONS;
 
     @Test
+    void nullMarked_whenInspectingDomainAndApplication_thenEveryPackageIsMarked() {
+        List<String> unmarked = new ClassFileImporter()
+                .withImportOption(new ImportOption.DoNotIncludeTests())
+                .importPackages("dev.fabian.gallardo.student.domain", "dev.fabian.gallardo.student.application")
+                .stream()
+                .map(JavaClass::getPackage)
+                .distinct()
+                .filter(pkg -> pkg.tryGetPackageInfo()
+                        .map(info -> !info.isAnnotatedWith("org.jspecify.annotations.NullMarked"))
+                        .orElse(true))
+                .map(JavaPackage::getName)
+                .sorted()
+                .toList();
+        org.assertj.core.api.Assertions.assertThat(unmarked)
+                .as("paquetes sin @NullMarked en package-info.java")
+                .isEmpty();
+    }
+
+    @Test
     void taikai_whenCheckingConventions_thenAllPass() {
         Taikai.builder()
                 .namespace("dev.fabian.gallardo.student")
@@ -71,11 +94,18 @@ class ArchitectureTest {
                 .java(java -> java.noUsageOfDeprecatedAPIs()
                         .methodsShouldNotDeclareGenericExceptions()
                         .utilityClassesShouldBeFinalAndHavePrivateConstructor()
-                        .imports(ImportsConfigurer::shouldHaveNoCycles))
-                .test(test -> test.junit(junit -> junit.classesShouldNotBeAnnotatedWithDisabled()
+                        .imports(ImportsConfigurer::shouldHaveNoCycles)
+                        .naming(naming -> naming.constantsShouldFollowConventions()
+                                .interfacesShouldNotHavePrefixI()))
+                .test(test -> test.junit(junit -> junit.classesShouldBePackagePrivate(".*Test(s)?")
+                        .classesShouldNotBeAnnotatedWithDisabled()
                         .methodsShouldNotBeAnnotatedWithDisabled()))
                 .spring(spring -> spring.noAutowiredFields()
-                        .boot(boot -> boot.applicationClassShouldResideInPackage("dev.fabian.gallardo.student")))
+                        .boot(boot -> boot.applicationClassShouldResideInPackage("dev.fabian.gallardo.student"))
+                        .configurations(config -> config.namesShouldMatch(".+(Config|Guard)"))
+                        .controllers(controllers -> controllers.namesShouldEndWithController()
+                                .shouldNotDependOnOtherControllers())
+                        .repositories(repositories -> repositories.shouldNotDependOnServices()))
                 .build()
                 .checkAll();
     }

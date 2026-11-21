@@ -8,36 +8,28 @@ import dev.fabian.gallardo.student.domain.model.SampleItem;
 import dev.fabian.gallardo.student.domain.port.out.SampleItemRepository;
 import java.math.BigDecimal;
 import java.util.UUID;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.support.TransactionTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
 
 /** El CRUD contra PostgreSQL real (Testcontainers): tabla, restriccion unica, orden, paginacion y auditoria. */
 @SpringBootTest
 @Import(TestcontainersConfig.class)
 @ActiveProfiles("test")
+@Sql("classpath:/cleanup-sample-item.sql")
 class SampleItemRepositoryIntegrationTest {
 
     private final SampleItemRepository repository;
     private final JdbcTemplate jdbc;
-    private final TransactionTemplate transaction;
 
     @Autowired
-    SampleItemRepositoryIntegrationTest(SampleItemRepository repository, JdbcTemplate jdbc, TransactionTemplate transaction) {
+    SampleItemRepositoryIntegrationTest(SampleItemRepository repository, JdbcTemplate jdbc) {
         this.repository = repository;
         this.jdbc = jdbc;
-        this.transaction = transaction;
-    }
-
-    @BeforeEach
-    void cleanTable() {
-        // El pool trabaja con auto-commit apagado: sin transaccion el delete nunca se confirma.
-        transaction.executeWithoutResult(_ -> jdbc.update("delete from sample_item"));
     }
 
     private static SampleItem item(String name) {

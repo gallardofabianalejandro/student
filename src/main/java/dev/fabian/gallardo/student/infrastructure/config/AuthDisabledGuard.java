@@ -12,13 +12,13 @@ import org.springframework.core.env.Profiles;
 @ConditionalOnProperty(prefix = "app.auth", name = "enabled", havingValue = "false")
 public class AuthDisabledGuard {
 
-    private static final Logger log = LoggerFactory.getLogger(AuthDisabledGuard.class);
+    private static final Logger LOG = LoggerFactory.getLogger(AuthDisabledGuard.class);
 
     public AuthDisabledGuard(Environment environment) {
         if (environment.acceptsProfiles(Profiles.of("production", "prod"))) {
             throw new IllegalStateException(
                     "app.auth.enabled=false no se permite con el perfil production: el login no puede apagarse en produccion");
         }
-        log.warn("LOGIN APAGADO (app.auth.enabled=false): toda la API esta abierta. Solo para desarrollo local.");
+        LOG.warn("LOGIN APAGADO (app.auth.enabled=false): toda la API esta abierta. Solo para desarrollo local.");
     }
 }

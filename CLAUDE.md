@@ -13,3 +13,6 @@ Servicio generado con `microservice-hexagonal-archetype` (Spring Boot 4.1 / Java
 - Versiones de starters siempre desde `platform-bom`, nunca a mano.
 - TDD: test rojo primero para todo codigo de produccion nuevo.
 - Commits: `tipo(scope): descripcion` con tipos feat|fix|refactor|test|docs|chore|perf.
+
+## Criterio detras de las reglas
+Skill `.claude/skills/spring-boot-hexagonal`: estrategia de testing, donde va cada clase y reglas de persistencia.
