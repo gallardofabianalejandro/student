@@ -9,8 +9,72 @@ vars:
 
 tasks:
   default:
+    desc: Muestra la guia de tareas (usa `task test` para correr las pruebas)
+    silent: true
     cmds:
-      - task: test
+      - task: ayuda
+
+  ayuda:
+    desc: Guia rapida de las tareas, de lo mas usado a lo menos usado
+    silent: true
+    cmds:
+      - 'echo ""'
+      - 'echo "ALTA - el dia a dia"'
+      - 'echo "  task test         formatea y corre todos los tests con cobertura"'
+      - 'echo "  task run          levanta la app local (Postgres por compose)"'
+      - 'echo "  task verify       lo mismo que hace el CI (sin formatear)"'
+      - 'echo ""'
+      - 'echo "MEDIA - flujos que juntan varias tareas"'
+      - 'echo "  task setup        primera vez: instala front y e2e en paralelo y revisa herramientas"'
+      - 'echo "  task up / down    sube o baja todo lo local (Postgres y Grafana)"'
+      - 'echo "  task ship         verifica y publica la imagen (pide confirmacion)"'
+      - 'echo "  task e2e_render   pruebas de punta a punta contra Render"'
+      - 'echo ""'
+      - 'echo "OBSERVABILIDAD"'
+      - 'echo "  task run_obs      app + Grafana local (http://localhost:3000)"'
+      - 'echo "  task run_cloud    app enviando a Grafana Cloud"'
+      - 'echo "  task obs_check    comprueba el acceso a Grafana Cloud"'
+      - 'echo ""'
+      - 'echo "BAJA - utilidades"'
+      - 'echo "  e2e, e2e_report, front_dev, front_test, new_entity, coverage, sbom, deps_updates, doctor, db_reset, clean"'
+      - 'echo ""'
+      - 'echo "Lista completa con descripciones: task --list"'
+
+  setup:
+    desc: "Primera vez en una maquina: instala front y e2e (en paralelo) y revisa las herramientas"
+    deps: [front_install, e2e_install]
+    cmds:
+      - task: doctor
+
+  up:
+    desc: Sube todo lo local en una sola orden (Postgres y la pila de Grafana)
+    cmds:
+      - docker compose --profile observability up -d --wait
+
+  down:
+    desc: Baja todo lo local en una sola orden (conserva los datos de Postgres)
+    cmds:
+      - docker compose --profile observability stop
+
+  ship:
+    desc: "Publica una version: verifica (tests y cobertura) y sube la imagen. Despues: Manual Deploy en Render"
+    prompt: "Esto publica {{.IMAGE_NAME}}:{{.VERSION}} en el registro. Continuar?"
+    cmds:
+      - task: verify
+      - task: push_image
+      - 'echo "Imagen publicada. Siguiente - Manual Deploy en Render y luego task e2e_render"'
+
+  e2e_render:
+    desc: Pruebas de punta a punta contra el servicio publicado en Render
+    cmds:
+      - task: e2e
+        vars:
+          E2E_ENV: render
+
+  obs_check:
+    desc: "Comprueba el acceso a Grafana Cloud (requiere GRAFANA_OTLP_ENDPOINT, GRAFANA_OTLP_INSTANCE_ID y GRAFANA_OTLP_TOKEN)"
+    cmds:
+      - python tools/grafana_check.py
 
   format:
     desc: Formatea el código (Spotless / palantir-java-format)
