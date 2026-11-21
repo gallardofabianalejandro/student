@@ -7,7 +7,7 @@
     <parent>
         <groupId>com.nacionservicios.emv</groupId>
         <artifactId>platform-parent</artifactId>
-        <version>2.0.17</version>
+        <version>2.0.19</version>
         <relativePath/>
     </parent>
 
@@ -19,8 +19,6 @@
     <name>student</name>
 
     <properties>
-        <!-- Alineada con el SDK de OpenTelemetry que trae Boot (opentelemetry-bom 1.62.0): instrumentation 2.28.x usa SDK 1.62.0 -->
-        <opentelemetry-instrumentation.version>2.28.0-alpha</opentelemetry-instrumentation.version>
         <errorprone.version>2.50.0</errorprone.version>
         <nullaway.version>0.13.7</nullaway.version>
         <jacoco.minimum.domain>0.90</jacoco.minimum.domain>
@@ -41,7 +39,7 @@
             <dependency>
                 <groupId>com.nacionservicios.emv</groupId>
                 <artifactId>platform-bom</artifactId>
-                <version>2.0.17</version>
+                <version>2.0.19</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -82,7 +80,6 @@
         <dependency>
             <groupId>io.opentelemetry.instrumentation</groupId>
             <artifactId>opentelemetry-logback-appender-1.0</artifactId>
-            <version>${opentelemetry-instrumentation.version}</version>
         </dependency>
         <dependency>
             <groupId>com.nacionservicios.emv</groupId>

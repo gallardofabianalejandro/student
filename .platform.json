@@ -2,8 +2,8 @@
   "artifactId": "student",
   "groupId": "dev.fabian.gallardo",
   "basePackage": "dev.fabian.gallardo.student",
-  "archetype": "com.nacionservicios.emv:microservice-hexagonal-archetype:2.0.17",
-  "bomVersion": "2.0.17",
+  "archetype": "com.nacionservicios.emv:microservice-hexagonal-archetype:2.0.19",
+  "bomVersion": "2.0.19",
   "capabilities": "core,observability,errors,openapi,http-audit,security,jwt,config,persistence,httpclient,testing,jwt-auth,spa,bootui,new-entity-tool",
   "imageName": "gallardofabian/student"
 }
