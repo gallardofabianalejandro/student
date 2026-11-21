@@ -86,6 +86,18 @@ Genera dominio, casos de uso, REST paginado (`/api/v1/alumnos`), JPA + migració
 Tipos: String, Integer, Long, BigDecimal, Boolean, LocalDate, Instant, UUID; `?` al final = opcional; `--path=cursos` cambia el endpoint.
 No pisa archivos existentes. Después: `task format` y `task verify`.
 
+## Observabilidad opcional (Grafana, Loki, Tempo, Prometheus)
+
+La pila `lgtm` del `compose.yml` es opcional y no arranca con `task run`. La telemetría de la app también está apagada por defecto.
+
+```bash
+task obs_up      # levanta Grafana en http://localhost:3000 (admin / admin)
+task run_obs     # obs_up + la app con OBSERVABILITY_ENABLED=true (métricas, trazas y logs por OTLP)
+task obs_down    # la baja; Postgres sigue
+```
+
+`OBSERVABILITY_ENABLED=true` enciende los tres exportadores a la vez. Con el `lgtm` apagado no hay avisos. Verificado: llegan métricas (unas 500 series) y trazas; el envío de logs por OTLP todavía no está confirmado.
+
 ## Pedidos `.http` para probar el servicio
 
 La carpeta `http/` trae pedidos listos para IntelliJ (cliente HTTP integrado; tambien sirve la extension REST Client de VS Code, sin los scripts de guardado de token). Elegir el entorno `local` y apretar el boton verde de cada pedido.
