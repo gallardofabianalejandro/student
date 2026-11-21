@@ -14,6 +14,8 @@ services:
       timeout: 3s
       retries: 10
   lgtm:
+    # Opcional: solo con `task obs_up` (profile observability). Grafana en http://localhost:3000 (admin/admin)
+    profiles: ["observability"]
     image: grafana/otel-lgtm:latest
     ports:
       - "3000:3000"

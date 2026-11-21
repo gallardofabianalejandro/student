@@ -48,6 +48,24 @@ tasks:
     cmds:
       - "{{.MVN}} -B -DskipTests package jib:build -Djib.to.image={{.IMAGE_NAME}}:{{.VERSION}}"
 
+  obs_up:
+    desc: Levanta Grafana, Loki, Tempo y Prometheus (profile observability) en http://localhost:3000
+    cmds:
+      - docker compose --profile observability up -d --wait lgtm
+
+  obs_down:
+    desc: Baja la pila de observabilidad (no toca Postgres)
+    cmds:
+      - docker compose --profile observability stop lgtm
+
+  run_obs:
+    desc: Levanta la pila de observabilidad y la app con la telemetria activada
+    env:
+      OBSERVABILITY_ENABLED: "true"
+    cmds:
+      - task: obs_up
+      - "{{.MVN}} -B spring-boot:run -Dspring-boot.run.profiles=local"
+
   local-up:
     desc: Levanta las dependencias locales (compose.yml)
     cmds:
