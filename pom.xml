@@ -19,6 +19,8 @@
     <name>student</name>
 
     <properties>
+        <errorprone.version>2.50.0</errorprone.version>
+        <nullaway.version>0.13.7</nullaway.version>
         <jacoco.minimum.domain>0.90</jacoco.minimum.domain>
         <jacoco.minimum.application>0.80</jacoco.minimum.application>
         <jacoco.minimum.infrastructure>0.60</jacoco.minimum.infrastructure>
@@ -45,6 +47,10 @@
     </dependencyManagement>
 
     <dependencies>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+        </dependency>
         <!-- Piso del ecosistema: siempre presente. -->
         <dependency>
             <groupId>com.nacionservicios.emv</groupId>
@@ -222,6 +228,31 @@
 
     <build>
         <plugins>
+            <!-- NullAway solo revisa los paquetes con @NullMarked (OnlyNullMarked): se migra paquete por paquete.
+                 Orden de procesadores: Lombok, MapStruct, Error Prone. -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <annotationProcessorPaths combine.children="append">
+                        <path>
+                            <groupId>com.google.errorprone</groupId>
+                            <artifactId>error_prone_core</artifactId>
+                            <version>${errorprone.version}</version>
+                        </path>
+                        <path>
+                            <groupId>com.uber.nullaway</groupId>
+                            <artifactId>nullaway</artifactId>
+                            <version>${nullaway.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <compilerArgs>
+                        <arg>-XDcompilePolicy=simple</arg>
+                        <arg>--should-stop=ifError=FLOW</arg>
+                        <arg>-Xplugin:ErrorProne -XepDisableAllChecks -Xep:NullAway:ERROR -XepOpt:NullAway:OnlyNullMarked=true -XepOpt:NullAway:JSpecifyMode=true</arg>
+                    </compilerArgs>
+                </configuration>
+            </plugin>
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
