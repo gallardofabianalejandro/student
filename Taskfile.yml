@@ -66,6 +66,14 @@ tasks:
       - task: obs_up
       - "{{.MVN}} -B spring-boot:run -Dspring-boot.run.profiles=local"
 
+  run_cloud:
+    desc: "Levanta la app enviando la telemetria a Grafana Cloud (requiere GRAFANA_OTLP_ENDPOINT, GRAFANA_OTLP_INSTANCE_ID y GRAFANA_OTLP_TOKEN)"
+    env:
+      GRAFANA_OTLP_AUTH:
+        sh: python tools/grafana_auth.py
+    cmds:
+      - "{{.MVN}} -B spring-boot:run -Dspring-boot.run.profiles=local,grafana-cloud"
+
   local-up:
     desc: Levanta las dependencias locales (compose.yml)
     cmds:

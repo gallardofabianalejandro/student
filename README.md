@@ -88,15 +88,22 @@ No pisa archivos existentes. Después: `task format` y `task verify`.
 
 ## Observabilidad opcional (Grafana, Loki, Tempo, Prometheus)
 
-La pila `lgtm` del `compose.yml` es opcional y no arranca con `task run`. La telemetría de la app también está apagada por defecto.
+La telemetría está apagada por defecto y se puede mandar a **dos destinos**. Con `OBSERVABILITY_ENABLED=true` se encienden a la vez métricas, trazas y logs por OTLP.
+
+| Destino | Cómo se arranca | Qué hace falta |
+|---|---|---|
+| **Grafana local** (profile `observability` del compose) | `task run_obs` | Docker. Grafana en http://localhost:3000 (admin / admin) |
+| **Grafana Cloud** | `task run_cloud` | Variables de entorno de usuario: `GRAFANA_OTLP_ENDPOINT` (termina en `/otlp`), `GRAFANA_OTLP_INSTANCE_ID` y `GRAFANA_OTLP_TOKEN` |
 
 ```bash
-task obs_up      # levanta Grafana en http://localhost:3000 (admin / admin)
-task run_obs     # obs_up + la app con OBSERVABILITY_ENABLED=true (métricas, trazas y logs por OTLP)
+task obs_up      # solo la pila local, sin la app
 task obs_down    # la baja; Postgres sigue
 ```
 
-`OBSERVABILITY_ENABLED=true` enciende los tres exportadores a la vez. Con el `lgtm` apagado no hay avisos. Verificado: llegan métricas (unas 500 series) y trazas; el envío de logs por OTLP todavía no está confirmado.
+- `run_cloud` arma la cabecera `Authorization` con `tools/grafana_auth.py` y activa el perfil `grafana-cloud` (`application-grafana-cloud.yml`). El token nunca se escribe en un archivo.
+- Sin las variables, la app no arranca con ese perfil, a propósito.
+- Los logs salen por el appender de logback de `logback-spring.xml`, que conecta con OpenTelemetry al arrancar.
+- Con la telemetría apagada no hay avisos aunque no haya colector.
 
 ## Pedidos `.http` para probar el servicio
 
