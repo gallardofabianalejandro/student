@@ -10,13 +10,16 @@ services:
     healthCheckPath: /actuator/health/readiness
     envVars:
       - key: SPRING_PROFILES_ACTIVE
-        value: production
+        value: production,grafana-cloud
       # Plan free: 512 MB y 0,1 CPU. Serial GC y pocos hilos del compilador para que la JVM entre y arranque.
       - key: JAVA_TOOL_OPTIONS
         value: "-XX:MaxRAMPercentage=65 -XX:+UseSerialGC -XX:TieredStopAtLevel=1 -Xss512k"
-      # En Render no hay colector OTLP: sin esto las metricas fallan a cada intervalo contra localhost.
-      - key: MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED
-        value: "false"
+      # Grafana Cloud: GRAFANA_OTLP_ENDPOINT termina en /otlp; GRAFANA_OTLP_AUTH es "Basic <base64 de instanceId:token>".
+      # Los valores se cargan en el panel de Render (sync: false); sin ellos el perfil grafana-cloud no arranca.
+      - key: GRAFANA_OTLP_ENDPOINT
+        sync: false
+      - key: GRAFANA_OTLP_AUTH
+        sync: false
       # Sin Config Server en Render: sin esto intenta conectarse a localhost:8888 al arrancar.
       - key: SPRING_CLOUD_CONFIG_ENABLED
         value: "false"
