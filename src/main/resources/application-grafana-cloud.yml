@@ -1,0 +1,31 @@
+# Perfil "grafana-cloud": envia la telemetria a Grafana Cloud en lugar del lgtm local.
+# Requiere GRAFANA_OTLP_ENDPOINT (termina en /otlp) y GRAFANA_OTLP_AUTH ("Basic <base64 de instanceId:token>").
+# Sin esas variables la app no arranca con este perfil, a proposito.
+management:
+  tracing:
+    export:
+      enabled: true
+  otlp:
+    metrics:
+      export:
+        enabled: true
+        url: ${GRAFANA_OTLP_ENDPOINT}/v1/metrics
+        headers:
+          Authorization: ${GRAFANA_OTLP_AUTH}
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: ${GRAFANA_OTLP_ENDPOINT}/v1/traces
+          headers:
+            Authorization: ${GRAFANA_OTLP_AUTH}
+    logging:
+      export:
+        otlp:
+          endpoint: ${GRAFANA_OTLP_ENDPOINT}/v1/logs
+          headers:
+            Authorization: ${GRAFANA_OTLP_AUTH}
+  logging:
+    export:
+      otlp:
+        enabled: true
