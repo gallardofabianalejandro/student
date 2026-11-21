@@ -9,7 +9,7 @@ import org.testcontainers.postgresql.PostgreSQLContainer;
 
 /** Dependencias reales (Testcontainers) segun las capacidades del servicio; las comparten los tests y TestApplication. */
 @TestConfiguration(proxyBeanMethods = false)
-class TestcontainersConfig {
+public class TestcontainersConfig {
 
     @Bean
     @ServiceConnection
