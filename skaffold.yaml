@@ -29,3 +29,10 @@ portForward:
     resourceName: student
     port: 80
     localPort: 8080
+profiles:
+  # skaffold dev/run -p cloud: igual que local pero con la telemetria hacia Grafana Cloud (requiere el Secret grafana-cloud).
+  - name: cloud
+    patches:
+      - op: replace
+        path: /manifests/kustomize/paths/0
+        value: deployment/local-cloud

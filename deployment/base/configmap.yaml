@@ -5,7 +5,8 @@ metadata:
 data:
   SPRING_PROFILES_ACTIVE: production
   DB_URL: jdbc:postgresql://CHANGE_ME:5432/student
-  TRACING_ENABLED: "true"
+  # Enciende metricas, trazas y logs OTLP a la vez (application.yml). Los *_EXPORT_URL apuntan al collector del cluster.
+  OBSERVABILITY_ENABLED: "true"
   TRACES_EXPORT_URL: http://CHANGE_ME:4318/v1/traces
   METRICS_EXPORT_URL: http://CHANGE_ME:4318/v1/metrics
   LOGS_EXPORT_URL: http://CHANGE_ME:4318/v1/logs

@@ -30,7 +30,8 @@ tasks:
       - 'echo ""'
       - 'echo "SUELTAS - por si las necesitas"'
       - 'echo "  run, run_obs, run_cloud, up, down, verify, e2e, e2e_render, obs_check, e2e_report, front_dev, front_test,"'
-      - 'echo "  new_entity, coverage, sbom, deps_updates, doctor, db_reset, clean"'
+      - 'echo "  new_entity, coverage, sbom, deps_updates, doctor, db_reset, clean,"'
+      - 'echo "  k8s_local, k8s_cloud, k8s_apply, k8s_check, k8s_grafana_secret, mutation, hooks_install"'
       - 'echo ""'
       - 'echo "Lista completa con descripciones: task --list"'
 
@@ -176,10 +177,69 @@ tasks:
     cmds:
       - docker compose logs -f
 
-  k8s_apply:
-    desc: Aplica los manifests kustomize (deployment/base)
+  mutation:
+    desc: "Mutation testing (PIT) sobre domain/ y application/; reporte en target/pit-reports/index.html (tarda varios minutos)"
     cmds:
-      - kubectl apply -k deployment/base
+      - "{{.MVN}} -B -Pmutation -Dskip.frontend=true test-compile org.pitest:pitest-maven:mutationCoverage"
+
+  hooks_install:
+    desc: "Activa los hooks de git del repo (.githooks): revisa manifiestos y formato Java antes de cada commit"
+    cmds:
+      - git config core.hooksPath .githooks
+
+  _k8s_guard:
+    internal: true
+    requires:
+      vars: [EXPECTED]
+    cmds:
+      - |
+        ctx=$(kubectl config current-context 2>/dev/null)
+        if [ "$ctx" != "{{.EXPECTED}}" ]; then
+          echo "Contexto de kubectl: '$ctx'. Se esperaba '{{.EXPECTED}}'. Abortado, no se toco nada." >&2
+          exit 1
+        fi
+
+  k8s_apply:
+    desc: "Aplica un overlay al cluster indicado: task k8s_apply CONTEXT=<contexto> [OVERLAY=deployment/<ruta>]; aborta si el contexto actual no coincide o si el overlay trae CHANGE_ME"
+    requires:
+      vars: [CONTEXT]
+    vars:
+      TARGET: '{{default "deployment/base" .OVERLAY}}'
+    cmds:
+      - task: _k8s_guard
+        vars: {EXPECTED: '{{.CONTEXT}}'}
+      - python tools/check_manifests.py --placeholders {{.TARGET}}
+      - kubectl --context={{.CONTEXT}} apply -k {{.TARGET}}
+
+  k8s_local:
+    desc: "Despliega en minikube con skaffold (overlay local, Postgres como pod). Aborta si el contexto no es minikube"
+    cmds:
+      - task: _k8s_guard
+        vars: {EXPECTED: minikube}
+      - skaffold run --kube-context minikube
+
+  k8s_check:
+    desc: "Renderiza base, local y local-cloud con kustomize y revisa que la telemetria y el Secret queden coherentes (lo mismo que corre el CI)"
+    cmds:
+      - python tools/check_manifests.py
+
+  k8s_grafana_secret:
+    desc: "Crea/actualiza el Secret grafana-cloud en minikube (requiere GRAFANA_OTLP_ENDPOINT, GRAFANA_OTLP_INSTANCE_ID y GRAFANA_OTLP_TOKEN)"
+    env:
+      GRAFANA_OTLP_AUTH:
+        sh: python tools/grafana_auth.py
+    cmds:
+      - task: _k8s_guard
+        vars: {EXPECTED: minikube}
+      - 'kubectl --context minikube create secret generic grafana-cloud --from-literal=GRAFANA_OTLP_ENDPOINT="$GRAFANA_OTLP_ENDPOINT" --from-literal=GRAFANA_OTLP_AUTH="$GRAFANA_OTLP_AUTH" --dry-run=client -o yaml | kubectl --context minikube apply -f -'
+
+  k8s_cloud:
+    desc: "Despliega en minikube con skaffold enviando la telemetria a Grafana Cloud (corre antes k8s_grafana_secret)"
+    cmds:
+      - task: _k8s_guard
+        vars: {EXPECTED: minikube}
+      - task: k8s_grafana_secret
+      - skaffold run -p cloud --kube-context minikube
 
   front_install:
     desc: Instala las dependencias del front (npm ci). Requiere Node 24 (mise install)
@@ -243,12 +303,18 @@ tasks:
       - 'echo "SBOM: target/bom.json"'
 
   doctor:
-    desc: Muestra las versiones de las herramientas (Java, Maven, Docker, Node)
+    desc: Muestra las versiones de las herramientas (Java, Maven, Docker, Node) y avisa si faltan las de Kubernetes
     cmds:
       - java -version
       - "{{.MVN}} -v"
       - docker --version
       - node --version
+      - cmd: kubectl version --client || echo "FALTA kubectl en el PATH"
+        ignore_error: true
+      - cmd: minikube version --short || echo "FALTA minikube en el PATH (skaffold lo necesita para cargar la imagen en el cluster)"
+        ignore_error: true
+      - cmd: skaffold version || echo "FALTA skaffold en el PATH"
+        ignore_error: true
 
   db_reset:
     desc: Borra y recrea la base local (pierde los datos locales)

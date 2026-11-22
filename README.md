@@ -105,6 +105,33 @@ task obs_down    # la baja; Postgres sigue
 - Los logs salen por el appender de logback de `logback-spring.xml`, que conecta con OpenTelemetry al arrancar.
 - Con la telemetría apagada no hay avisos aunque no haya colector.
 
+## Kubernetes: minikube y GKE
+
+| Qué | Comando | Notas |
+|---|---|---|
+| minikube con Postgres como pod | `task k8s_local` | Overlay `deployment/local`; telemetría apagada |
+| minikube enviando a Grafana Cloud | `task k8s_cloud` | Overlay `deployment/local-cloud`; crea antes el Secret `grafana-cloud` con `task k8s_grafana_secret` (usa las mismas variables que `run_cloud`) |
+| GKE | `task k8s_apply CONTEXT=<contexto>` | Aplica `deployment/base`; aborta si el contexto actual de kubectl no es el indicado |
+| Revisar los manifiestos | `task k8s_check` | Renderiza `base`, `local` y `local-cloud` y comprueba telemetría, PDB y que el Secret no esté versionado (también corre en el CI) |
+
+- Las tareas contra minikube abortan si el contexto de kubectl no es `minikube`, para no aplicar por error a un cluster real.
+- skaffold necesita `minikube` en el PATH: sin él construye la imagen pero no la carga en el cluster y el pod queda en `ErrImagePull`. `task doctor` avisa si falta.
+- `base` enciende métricas, trazas y logs con `OBSERVABILITY_ENABLED=true` y apunta a un collector en el cluster (`CHANGE_ME` hasta definirlo). El `PodDisruptionBudget` evita que un drain o un rolling update baje más de un pod.
+- El Secret `grafana-cloud` nunca se versiona: lo crea la tarea a partir de las variables de entorno.
+
+## Seguridad de la cadena de suministro y calidad
+
+| Qué | Dónde | Notas |
+|---|---|---|
+| Actions fijadas por SHA | `.github/workflows/*.yml` | Cada `uses:` lleva el SHA completo y la versión en un comentario; Renovate (`helpers:pinGitHubActionDigests`) los mantiene al día |
+| Permisos mínimos | cada workflow | `contents: read` y checkout sin credenciales persistentes (CodeQL suma `security-events: write`); `PACKAGES_TOKEN` solo en los pasos de Maven |
+| Mutation testing | `task mutation` y `mutation.yml` (semanal) | PIT sobre `domain/` y `application/`; no corre en `verify` ni bloquea PR |
+| Hooks de git | `task hooks_install` | Antes de cada commit revisa los manifiestos de `deployment/` y el formato Java |
+
+- **Por qué se fija por SHA:** en marzo de 2026 se comprometió la action `trivy-action` (76 de 77 tags apuntados a código que roba secretos del CI). Un tag se puede mover; un SHA no. Por eso tampoco se usa Trivy como action de terceros.
+- **Revisión de dependencias en PR:** requiere activar *Dependency graph* en Settings > Advanced Security (hoy está desactivado y la API responde 404). Con eso activo se agrega un workflow con `actions/dependency-review-action` fijado por SHA.
+- **Escaneo de secretos:** al ser un repo público, GitHub Secret Scanning con push protection cubre el repo sin sumar una herramienta al CI.
+
 ## Pedidos `.http` para probar el servicio
 
 La carpeta `http/` trae pedidos listos para IntelliJ (cliente HTTP integrado; tambien sirve la extension REST Client de VS Code, sin los scripts de guardado de token). Elegir el entorno `local` y apretar el boton verde de cada pedido.

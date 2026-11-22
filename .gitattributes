@@ -1,0 +1,3 @@
+
+# Scripts de shell siempre con LF (con CRLF el hook falla)
+.githooks/* text eol=lf

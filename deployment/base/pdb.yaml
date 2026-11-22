@@ -1,0 +1,10 @@
+# Un rolling update o un drain de nodo nunca baja mas de un pod a la vez (con 1 replica local permite el drain).
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: student
+spec:
+  maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: student

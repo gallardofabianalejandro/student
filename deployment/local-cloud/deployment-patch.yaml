@@ -1,0 +1,18 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: student
+spec:
+  template:
+    spec:
+      containers:
+        - name: student
+          envFrom:
+            - configMapRef:
+                name: student-config
+            - secretRef:
+                name: grafana-cloud
+          env:
+            # El overlay local lo apaga; la variable de entorno gana sobre el YAML del perfil.
+            - name: MANAGEMENT_OTLP_METRICS_EXPORT_ENABLED
+              value: "true"
