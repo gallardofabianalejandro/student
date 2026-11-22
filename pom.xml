@@ -432,6 +432,41 @@
                 <skip.frontend.tests>true</skip.frontend.tests>
             </properties>
         </profile>
+        <profile>
+            <!-- Mutation testing: mvn -Pmutation test-compile org.pitest:pitest-maven:mutationCoverage (o task mutation). No corre en verify. -->
+            <id>mutation</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.pitest</groupId>
+                        <artifactId>pitest-maven</artifactId>
+                        <version>1.30.2</version>
+                        <dependencies>
+                            <dependency>
+                                <groupId>org.pitest</groupId>
+                                <artifactId>pitest-junit5-plugin</artifactId>
+                                <version>1.2.3</version>
+                            </dependency>
+                        </dependencies>
+                        <configuration>
+                            <targetClasses>
+                                <param>dev.fabian.gallardo.student.domain.*</param>
+                                <param>dev.fabian.gallardo.student.application.*</param>
+                            </targetClasses>
+                            <outputFormats>
+                                <outputFormat>HTML</outputFormat>
+                                <outputFormat>XML</outputFormat>
+                            </outputFormats>
+                            <timestampedReports>false</timestampedReports>
+                            <mutationThreshold>${pitest.mutation.threshold}</mutationThreshold>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+            <properties>
+                <pitest.mutation.threshold>85</pitest.mutation.threshold>
+            </properties>
+        </profile>
     </profiles>
 
 </project>

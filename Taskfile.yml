@@ -30,7 +30,8 @@ tasks:
       - 'echo ""'
       - 'echo "SUELTAS - por si las necesitas"'
       - 'echo "  run, run_obs, run_cloud, up, down, verify, e2e, e2e_render, obs_check, e2e_report, front_dev, front_test,"'
-      - 'echo "  new_entity, coverage, sbom, deps_updates, doctor, db_reset, clean"'
+      - 'echo "  new_entity, coverage, sbom, deps_updates, doctor, db_reset, clean,"'
+      - 'echo "  k8s_local, k8s_cloud, k8s_apply, k8s_check, k8s_grafana_secret, mutation, hooks_install"'
       - 'echo ""'
       - 'echo "Lista completa con descripciones: task --list"'
 
@@ -176,6 +177,16 @@ tasks:
     cmds:
       - docker compose logs -f
 
+  mutation:
+    desc: "Mutation testing (PIT) sobre domain/ y application/; reporte en target/pit-reports/index.html (tarda varios minutos)"
+    cmds:
+      - "{{.MVN}} -B -Pmutation -Dskip.frontend=true test-compile org.pitest:pitest-maven:mutationCoverage"
+
+  hooks_install:
+    desc: "Activa los hooks de git del repo (.githooks): revisa manifiestos y formato Java antes de cada commit"
+    cmds:
+      - git config core.hooksPath .githooks
+
   _k8s_guard:
     internal: true
     requires:
@@ -189,20 +200,23 @@ tasks:
         fi
 
   k8s_apply:
-    desc: "Aplica deployment/base (GKE) al cluster indicado: task k8s_apply CONTEXT=<contexto de kubectl>; aborta si el contexto actual no coincide"
+    desc: "Aplica un overlay al cluster indicado: task k8s_apply CONTEXT=<contexto> [OVERLAY=deployment/<ruta>]; aborta si el contexto actual no coincide o si el overlay trae CHANGE_ME"
     requires:
       vars: [CONTEXT]
+    vars:
+      TARGET: '{{default "deployment/base" .OVERLAY}}'
     cmds:
       - task: _k8s_guard
         vars: {EXPECTED: '{{.CONTEXT}}'}
-      - kubectl apply -k deployment/base
+      - python tools/check_manifests.py --placeholders {{.TARGET}}
+      - kubectl --context={{.CONTEXT}} apply -k {{.TARGET}}
 
   k8s_local:
     desc: "Despliega en minikube con skaffold (overlay local, Postgres como pod). Aborta si el contexto no es minikube"
     cmds:
       - task: _k8s_guard
         vars: {EXPECTED: minikube}
-      - skaffold run
+      - skaffold run --kube-context minikube
 
   k8s_check:
     desc: "Renderiza base, local y local-cloud con kustomize y revisa que la telemetria y el Secret queden coherentes (lo mismo que corre el CI)"
@@ -210,20 +224,22 @@ tasks:
       - python tools/check_manifests.py
 
   k8s_grafana_secret:
-    desc: "Crea/actualiza el Secret grafana-cloud en el cluster actual (requiere GRAFANA_OTLP_ENDPOINT, GRAFANA_OTLP_INSTANCE_ID y GRAFANA_OTLP_TOKEN)"
+    desc: "Crea/actualiza el Secret grafana-cloud en minikube (requiere GRAFANA_OTLP_ENDPOINT, GRAFANA_OTLP_INSTANCE_ID y GRAFANA_OTLP_TOKEN)"
     env:
       GRAFANA_OTLP_AUTH:
         sh: python tools/grafana_auth.py
     cmds:
       - task: _k8s_guard
-        vars: {EXPECTED: '{{default "minikube" .CONTEXT}}'}
-      - 'kubectl create secret generic grafana-cloud --from-literal=GRAFANA_OTLP_ENDPOINT="$GRAFANA_OTLP_ENDPOINT" --from-literal=GRAFANA_OTLP_AUTH="$GRAFANA_OTLP_AUTH" --dry-run=client -o yaml | kubectl apply -f -'
+        vars: {EXPECTED: minikube}
+      - 'kubectl --context minikube create secret generic grafana-cloud --from-literal=GRAFANA_OTLP_ENDPOINT="$GRAFANA_OTLP_ENDPOINT" --from-literal=GRAFANA_OTLP_AUTH="$GRAFANA_OTLP_AUTH" --dry-run=client -o yaml | kubectl --context minikube apply -f -'
 
   k8s_cloud:
     desc: "Despliega en minikube con skaffold enviando la telemetria a Grafana Cloud (corre antes k8s_grafana_secret)"
     cmds:
+      - task: _k8s_guard
+        vars: {EXPECTED: minikube}
       - task: k8s_grafana_secret
-      - skaffold run -p cloud
+      - skaffold run -p cloud --kube-context minikube
 
   front_install:
     desc: Instala las dependencias del front (npm ci). Requiere Node 24 (mise install)

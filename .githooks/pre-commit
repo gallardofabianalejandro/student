@@ -1,0 +1,15 @@
+#!/bin/sh
+# Hook de pre-commit sin dependencias externas. Se activa con `task hooks_install`.
+# Revisa solo lo que se esta commiteando: manifiestos de deployment/ y formato Java (spotless).
+staged=$(git diff --cached --name-only --diff-filter=ACM)
+
+if echo "$staged" | grep -q '^deployment/'; then
+  echo "[pre-commit] revisando manifiestos de deployment/"
+  { python3 tools/check_manifests.py || python tools/check_manifests.py; } || exit 1
+fi
+
+if echo "$staged" | grep -q '\.java$'; then
+  echo "[pre-commit] spotless:check"
+  mvn -B -ntp -q -Dskip.frontend=true spotless:check || { echo "Formato Java incorrecto: corre 'task format'." >&2; exit 1; }
+fi
+exit 0

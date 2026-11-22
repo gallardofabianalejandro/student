@@ -35,6 +35,47 @@ class BaseRules(unittest.TestCase):
         self.assertTrue(any("PodDisruptionBudget" in e for e in errors))
 
 
+class BaseIsolation(unittest.TestCase):
+    OK = [cfg(OBSERVABILITY_ENABLED="true"), dep(), PDB]
+
+    def test_base_whenContainsSecret_thenReports(self):
+        secret = {"kind": "Secret", "metadata": {"name": "student-secrets"}}
+        self.assertTrue(any("Secret" in e for e in cm.check_base(self.OK + [secret])))
+
+    def test_base_whenContainsPostgresDeployment_thenReports(self):
+        self.assertTrue(any("postgres" in e for e in cm.check_base(self.OK + [POSTGRES])))
+
+    def test_base_whenGrafanaCloudProfileLeaks_thenReports(self):
+        docs = [cfg(OBSERVABILITY_ENABLED="true", SPRING_PROFILES_ACTIVE="production,grafana-cloud"), dep(), PDB]
+        self.assertTrue(any("grafana-cloud" in e for e in cm.check_base(docs)))
+
+
+class CredentialLeaks(unittest.TestCase):
+    def test_noCredentials_whenOnlySecretRef_thenNoErrors(self):
+        docs = [cfg(A="1"), dep(env_from=[{"secretRef": {"name": "grafana-cloud"}}])]
+        self.assertEqual([], cm.check_no_credentials(docs))
+
+    def test_credentials_whenAuthKeyInConfigMap_thenReports(self):
+        self.assertTrue(cm.check_no_credentials([cfg(GRAFANA_OTLP_AUTH="Basic abc")]))
+
+    def test_credentials_whenTokenInAnySecret_thenReports(self):
+        secret = {"kind": "Secret", "metadata": {"name": "otro"}, "stringData": {"GRAFANA_OTLP_TOKEN": "x"}}
+        self.assertTrue(cm.check_no_credentials([secret]))
+
+    def test_credentials_whenBasicHeaderInEnvValue_thenReports(self):
+        docs = [dep(env=[{"name": "ANYTHING", "value": "Basic MTIzOnRva2Vu"}])]
+        self.assertTrue(cm.check_no_credentials(docs))
+
+
+class Placeholders(unittest.TestCase):
+    def test_placeholders_whenChangeMePresent_thenReturnsLines(self):
+        text = "a: 1\nDB_URL: jdbc:postgresql://CHANGE_ME:5432/student\n"
+        self.assertEqual(["DB_URL: jdbc:postgresql://CHANGE_ME:5432/student"], cm.find_placeholders(text))
+
+    def test_placeholders_whenNone_thenEmpty(self):
+        self.assertEqual([], cm.find_placeholders("a: 1\nb: 2\n"))
+
+
 class LocalRules(unittest.TestCase):
     def test_local_whenObservabilityOff_thenNoErrors(self):
         self.assertEqual([], cm.check_local([cfg(OBSERVABILITY_ENABLED="false"), dep()]))

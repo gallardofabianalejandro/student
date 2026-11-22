@@ -1,0 +1,40 @@
+name: Mutation testing
+
+# PIT sobre domain/ y application/. Semanal y a pedido; no bloquea los PR. Reporte HTML como artefacto.
+on:
+  schedule:
+    - cron: "0 7 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pit:
+    name: PIT
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-java@cf277c60eb25467037889841efdb72551f06f6c3 # v4.9.1
+        with:
+          distribution: temurin
+          java-version: "25"
+          cache: maven
+
+      - name: PIT
+        env:
+          # Lectura de platform-parent/starters desde GitHub Packages (.mvn/settings.xml). Crear el secreto PACKAGES_TOKEN.
+          GH_PACKAGES_USER: ${{ github.actor }}
+          GH_PACKAGES_TOKEN: ${{ secrets.PACKAGES_TOKEN }}
+        run: mvn -B -ntp -Pmutation -Dskip.frontend=true test-compile org.pitest:pitest-maven:mutationCoverage
+
+      - name: Reporte
+        if: ${{ always() }}
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        with:
+          name: pit-report
+          path: target/pit-reports
+          retention-days: 14
