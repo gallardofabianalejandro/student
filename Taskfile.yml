@@ -15,28 +15,22 @@ tasks:
       - task: ayuda
 
   ayuda:
-    desc: Guia rapida de las tareas, de lo mas usado a lo menos usado
+    desc: Guia rapida de las tareas, ordenadas por fase de trabajo
     silent: true
     cmds:
       - 'echo ""'
-      - 'echo "ALTA - el dia a dia"'
-      - 'echo "  task test         formatea y corre todos los tests con cobertura"'
-      - 'echo "  task run          levanta la app local (Postgres por compose)"'
-      - 'echo "  task verify       lo mismo que hace el CI (sin formatear)"'
+      - 'echo "FASES DEL TRABAJO - lo que mas vas a usar"'
+      - 'echo "  1. task setup          primera vez en una maquina (instala front y e2e en paralelo)"'
+      - 'echo "  2. task dev            desarrollar: levanta la app (DESTINO=local o DESTINO=cloud para ver Grafana)"'
+      - 'echo "  3. task test           validar: formatea y corre todos los tests con cobertura"'
+      - 'echo "  4. task ship           publicar: verifica y sube la imagen (pide confirmacion)"'
+      - 'echo "  5. task post_deploy    despues de desplegar: e2e en Render y acceso a Grafana Cloud (en paralelo)"'
+      - 'echo "  6. task mantenimiento  revision periodica: dependencias y SBOM (en paralelo)"'
+      - 'echo "  7. task fin            cerrar el dia: baja contenedores, Docker Desktop y WSL (pide confirmacion)"'
       - 'echo ""'
-      - 'echo "MEDIA - flujos que juntan varias tareas"'
-      - 'echo "  task setup        primera vez: instala front y e2e en paralelo y revisa herramientas"'
-      - 'echo "  task up / down    sube o baja todo lo local (Postgres y Grafana)"'
-      - 'echo "  task ship         verifica y publica la imagen (pide confirmacion)"'
-      - 'echo "  task e2e_render   pruebas de punta a punta contra Render"'
-      - 'echo ""'
-      - 'echo "OBSERVABILIDAD"'
-      - 'echo "  task run_obs      app + Grafana local (http://localhost:3000)"'
-      - 'echo "  task run_cloud    app enviando a Grafana Cloud"'
-      - 'echo "  task obs_check    comprueba el acceso a Grafana Cloud"'
-      - 'echo ""'
-      - 'echo "BAJA - utilidades"'
-      - 'echo "  e2e, e2e_report, front_dev, front_test, new_entity, coverage, sbom, deps_updates, doctor, db_reset, clean"'
+      - 'echo "SUELTAS - por si las necesitas"'
+      - 'echo "  run, run_obs, run_cloud, up, down, verify, e2e, e2e_render, obs_check, e2e_report, front_dev, front_test,"'
+      - 'echo "  new_entity, coverage, sbom, deps_updates, doctor, db_reset, clean"'
       - 'echo ""'
       - 'echo "Lista completa con descripciones: task --list"'
 
@@ -55,6 +49,35 @@ tasks:
     desc: Baja todo lo local en una sola orden (conserva los datos de Postgres)
     cmds:
       - docker compose --profile observability stop
+
+  dev:
+    desc: "Desarrollar: levanta la app. DESTINO=local (Grafana local) o DESTINO=cloud (Grafana Cloud); sin DESTINO, sin telemetria"
+    vars:
+      DESTINO: '{{default "ninguno" .DESTINO}}'
+    cmds:
+      - task: '{{if eq .DESTINO "local"}}run_obs{{else if eq .DESTINO "cloud"}}run_cloud{{else}}run{{end}}'
+
+  post_deploy:
+    desc: "Despues de desplegar: e2e contra Render y acceso a Grafana Cloud, en paralelo"
+    deps: [e2e_render, obs_check]
+
+  mantenimiento:
+    desc: "Revision periodica: actualizaciones de dependencias y SBOM (en paralelo) y estado de las herramientas"
+    deps: [deps_updates, sbom]
+    cmds:
+      - task: doctor
+
+  fin:
+    desc: "Cerrar el dia: baja contenedores, apaga Docker Desktop y WSL (pide confirmacion)"
+    prompt: "Esto baja los contenedores, apaga Docker Desktop y ejecuta wsl --shutdown. Continuar?"
+    cmds:
+      - task: down
+      - cmd: docker desktop stop
+        ignore_error: true
+      - cmd: wsl --shutdown
+        platforms: [windows]
+        ignore_error: true
+      - 'echo "Listo: contenedores, Docker Desktop y WSL apagados"'
 
   ship:
     desc: "Publica una version: verifica (tests y cobertura) y sube la imagen. Despues: Manual Deploy en Render"
