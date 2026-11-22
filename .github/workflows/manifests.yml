@@ -1,0 +1,35 @@
+name: Manifests
+
+# Renderiza los overlays de deployment/ y revisa que sigan coherentes (telemetria, PDB, Secret sin versionar).
+on:
+  push:
+    branches: [ "main", "master", "fix/*", "feat/*" ]
+    paths:
+      - "deployment/**"
+      - "tools/check_manifests.py"
+      - "tools/test_check_manifests.py"
+      - ".github/workflows/manifests.yml"
+  pull_request:
+    paths:
+      - "deployment/**"
+      - "tools/check_manifests.py"
+      - "tools/test_check_manifests.py"
+
+permissions:
+  contents: read
+
+jobs:
+  manifests:
+    name: Kustomize
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dependencias
+        run: python3 -m pip install --quiet pyyaml
+
+      - name: Pruebas de las reglas
+        run: python3 tools/test_check_manifests.py
+
+      - name: Renderizar y verificar overlays
+        run: python3 tools/check_manifests.py

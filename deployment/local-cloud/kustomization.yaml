@@ -1,0 +1,7 @@
+# Overlay minikube + Grafana Cloud: local + perfil grafana-cloud. El Secret "grafana-cloud" NO se versiona: lo crea `task k8s_grafana_secret`.
+resources:
+  - ../local
+
+patches:
+  - path: configmap-patch.yaml
+  - path: deployment-patch.yaml

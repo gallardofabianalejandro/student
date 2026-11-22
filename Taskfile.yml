@@ -176,10 +176,54 @@ tasks:
     cmds:
       - docker compose logs -f
 
-  k8s_apply:
-    desc: Aplica los manifests kustomize (deployment/base)
+  _k8s_guard:
+    internal: true
+    requires:
+      vars: [EXPECTED]
     cmds:
+      - |
+        ctx=$(kubectl config current-context 2>/dev/null)
+        if [ "$ctx" != "{{.EXPECTED}}" ]; then
+          echo "Contexto de kubectl: '$ctx'. Se esperaba '{{.EXPECTED}}'. Abortado, no se toco nada." >&2
+          exit 1
+        fi
+
+  k8s_apply:
+    desc: "Aplica deployment/base (GKE) al cluster indicado: task k8s_apply CONTEXT=<contexto de kubectl>; aborta si el contexto actual no coincide"
+    requires:
+      vars: [CONTEXT]
+    cmds:
+      - task: _k8s_guard
+        vars: {EXPECTED: '{{.CONTEXT}}'}
       - kubectl apply -k deployment/base
+
+  k8s_local:
+    desc: "Despliega en minikube con skaffold (overlay local, Postgres como pod). Aborta si el contexto no es minikube"
+    cmds:
+      - task: _k8s_guard
+        vars: {EXPECTED: minikube}
+      - skaffold run
+
+  k8s_check:
+    desc: "Renderiza base, local y local-cloud con kustomize y revisa que la telemetria y el Secret queden coherentes (lo mismo que corre el CI)"
+    cmds:
+      - python tools/check_manifests.py
+
+  k8s_grafana_secret:
+    desc: "Crea/actualiza el Secret grafana-cloud en el cluster actual (requiere GRAFANA_OTLP_ENDPOINT, GRAFANA_OTLP_INSTANCE_ID y GRAFANA_OTLP_TOKEN)"
+    env:
+      GRAFANA_OTLP_AUTH:
+        sh: python tools/grafana_auth.py
+    cmds:
+      - task: _k8s_guard
+        vars: {EXPECTED: '{{default "minikube" .CONTEXT}}'}
+      - 'kubectl create secret generic grafana-cloud --from-literal=GRAFANA_OTLP_ENDPOINT="$GRAFANA_OTLP_ENDPOINT" --from-literal=GRAFANA_OTLP_AUTH="$GRAFANA_OTLP_AUTH" --dry-run=client -o yaml | kubectl apply -f -'
+
+  k8s_cloud:
+    desc: "Despliega en minikube con skaffold enviando la telemetria a Grafana Cloud (corre antes k8s_grafana_secret)"
+    cmds:
+      - task: k8s_grafana_secret
+      - skaffold run -p cloud
 
   front_install:
     desc: Instala las dependencias del front (npm ci). Requiere Node 24 (mise install)
@@ -243,12 +287,18 @@ tasks:
       - 'echo "SBOM: target/bom.json"'
 
   doctor:
-    desc: Muestra las versiones de las herramientas (Java, Maven, Docker, Node)
+    desc: Muestra las versiones de las herramientas (Java, Maven, Docker, Node) y avisa si faltan las de Kubernetes
     cmds:
       - java -version
       - "{{.MVN}} -v"
       - docker --version
       - node --version
+      - cmd: kubectl version --client || echo "FALTA kubectl en el PATH"
+        ignore_error: true
+      - cmd: minikube version --short || echo "FALTA minikube en el PATH (skaffold lo necesita para cargar la imagen en el cluster)"
+        ignore_error: true
+      - cmd: skaffold version || echo "FALTA skaffold en el PATH"
+        ignore_error: true
 
   db_reset:
     desc: Borra y recrea la base local (pierde los datos locales)

@@ -105,6 +105,20 @@ task obs_down    # la baja; Postgres sigue
 - Los logs salen por el appender de logback de `logback-spring.xml`, que conecta con OpenTelemetry al arrancar.
 - Con la telemetría apagada no hay avisos aunque no haya colector.
 
+## Kubernetes: minikube y GKE
+
+| Qué | Comando | Notas |
+|---|---|---|
+| minikube con Postgres como pod | `task k8s_local` | Overlay `deployment/local`; telemetría apagada |
+| minikube enviando a Grafana Cloud | `task k8s_cloud` | Overlay `deployment/local-cloud`; crea antes el Secret `grafana-cloud` con `task k8s_grafana_secret` (usa las mismas variables que `run_cloud`) |
+| GKE | `task k8s_apply CONTEXT=<contexto>` | Aplica `deployment/base`; aborta si el contexto actual de kubectl no es el indicado |
+| Revisar los manifiestos | `task k8s_check` | Renderiza `base`, `local` y `local-cloud` y comprueba telemetría, PDB y que el Secret no esté versionado (también corre en el CI) |
+
+- Las tareas contra minikube abortan si el contexto de kubectl no es `minikube`, para no aplicar por error a un cluster real.
+- skaffold necesita `minikube` en el PATH: sin él construye la imagen pero no la carga en el cluster y el pod queda en `ErrImagePull`. `task doctor` avisa si falta.
+- `base` enciende métricas, trazas y logs con `OBSERVABILITY_ENABLED=true` y apunta a un collector en el cluster (`CHANGE_ME` hasta definirlo). El `PodDisruptionBudget` evita que un drain o un rolling update baje más de un pod.
+- El Secret `grafana-cloud` nunca se versiona: lo crea la tarea a partir de las variables de entorno.
+
 ## Pedidos `.http` para probar el servicio
 
 La carpeta `http/` trae pedidos listos para IntelliJ (cliente HTTP integrado; tambien sirve la extension REST Client de VS Code, sin los scripts de guardado de token). Elegir el entorno `local` y apretar el boton verde de cada pedido.
