@@ -1,7 +1,7 @@
-# Slices de test (Boot 4.1)
+# Slices de test (Boot 4.2)
 
 En Boot 4 las anotaciones de test se movieron a modulos `spring-boot-<tecnologia>-test`. Imports verificados
-contra 4.1.2:
+contra 4.2.0:
 
 | Anotacion | Paquete | Artefacto |
 |---|---|---|

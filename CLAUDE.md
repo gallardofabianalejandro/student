@@ -1,6 +1,6 @@
 # student
 
-Servicio generado con `microservice-hexagonal-archetype` (Spring Boot 4.1 / Java 25). Capacidades: `core,observability,errors,openapi,http-audit,security,jwt,config,persistence,httpclient,testing,jwt-auth,spa,bootui,new-entity-tool` (ver `.platform.json`).
+Servicio generado con `microservice-hexagonal-archetype` (Spring Boot 4.2 / Java 25). Capacidades: `core,observability,errors,openapi,http-audit,security,jwt,config,persistence,httpclient,testing,jwt-auth,spa,bootui,new-entity-tool` (ver `.platform.json`).
 
 ## Comandos
 - `task test` formatea y corre todo - `task run` levanta con perfil `local` + `compose.yml`
