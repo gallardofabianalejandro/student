@@ -1,7 +1,7 @@
 ---
 name: spring-boot-hexagonal
 description: >
-  Convenciones de testing, arquitectura hexagonal y persistencia para servicios Spring Boot 4.1 / Java 25
+  Convenciones de testing, arquitectura hexagonal y persistencia para servicios Spring Boot 4.2 / Java 25
   generados con microservice-hexagonal-archetype. Usar al escribir o revisar tests (unitarios, slices,
   smoke, e2e, Testcontainers), al agregar casos de uso, controllers, adapters JPA o migraciones Flyway,
   y al decidir en que nivel testear algo.

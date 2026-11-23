@@ -1,7 +1,7 @@
 # student
 
 Generado por `microservice-hexagonal-archetype` sobre `platform-parent` +
-`platform-bom` (Spring Boot 4.1 / Java 25).
+`platform-bom` (Spring Boot 4.2 / Java 25).
 
 ## Estructura
 
