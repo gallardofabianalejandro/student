@@ -125,11 +125,11 @@ task obs_down    # la baja; Postgres sigue
 |---|---|---|
 | Actions fijadas por SHA | `.github/workflows/*.yml` | Cada `uses:` lleva el SHA completo y la versión en un comentario; Renovate (`helpers:pinGitHubActionDigests`) los mantiene al día |
 | Permisos mínimos | cada workflow | `contents: read` y checkout sin credenciales persistentes (CodeQL suma `security-events: write`); `PACKAGES_TOKEN` solo en los pasos de Maven |
+| Revisión de dependencias | `dependency-review.yml` | Bloquea un PR que agregue una dependencia con vulnerabilidad alta o crítica; action de GitHub, sin secretos. Requiere el Dependency graph activado |
 | Mutation testing | `task mutation` y `mutation.yml` (semanal) | PIT sobre `domain/` y `application/`; no corre en `verify` ni bloquea PR |
 | Hooks de git | `task hooks_install` | Antes de cada commit revisa los manifiestos de `deployment/` y el formato Java |
 
 - **Por qué se fija por SHA:** en marzo de 2026 se comprometió la action `trivy-action` (76 de 77 tags apuntados a código que roba secretos del CI). Un tag se puede mover; un SHA no. Por eso tampoco se usa Trivy como action de terceros.
-- **Revisión de dependencias en PR:** requiere activar *Dependency graph* en Settings > Advanced Security (hoy está desactivado y la API responde 404). Con eso activo se agrega un workflow con `actions/dependency-review-action` fijado por SHA.
 - **Escaneo de secretos:** al ser un repo público, GitHub Secret Scanning con push protection cubre el repo sin sumar una herramienta al CI.
 
 ## Pedidos `.http` para probar el servicio

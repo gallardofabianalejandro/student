@@ -1,0 +1,27 @@
+name: Dependency review
+
+# Bloquea el PR si agrega una dependencia con vulnerabilidad alta o critica. Action de GitHub (sin terceros), sin secretos.
+# Requiere el Dependency graph activado en el repo (Settings > Advanced Security).
+on:
+  pull_request:
+    paths:
+      - "pom.xml"
+      - "frontend/package*.json"
+      - "e2e/package*.json"
+      - ".github/workflows/dependency-review.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/dependency-review-action@bbc44d14a204704ccc493733616cd1e93a0321ec # v5.0.1
+        with:
+          fail-on-severity: high
