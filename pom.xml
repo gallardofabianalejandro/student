@@ -237,7 +237,7 @@
 
     <build>
         <plugins>
-            <!-- NullAway solo revisa los paquetes con @NullMarked (OnlyNullMarked): se migra paquete por paquete.
+            <!-- NullAway solo revisa los paquetes con @NullMarked (OnlyNullMarked). Ya estan todos marcados; NullMarkedPackagesTest falla si un paquete nuevo no lleva su package-info.
                  Orden de procesadores: Lombok, MapStruct, Error Prone. -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>

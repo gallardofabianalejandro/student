@@ -2,6 +2,7 @@ package dev.fabian.gallardo.student.api.rest;
 
 import dev.fabian.gallardo.student.domain.exception.SampleItemAlreadyExistsException;
 import dev.fabian.gallardo.student.domain.exception.SampleItemNotFoundException;
+import org.jspecify.annotations.Nullable;
 import org.springframework.core.Ordered;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpStatus;
@@ -24,7 +25,7 @@ public class SampleItemExceptionHandler {
         return problem(HttpStatus.CONFLICT, ex.getMessage(), "SAMPLE_ITEM_ALREADY_EXISTS");
     }
 
-    private static ProblemDetail problem(HttpStatus status, String detail, String errorCode) {
+    private static ProblemDetail problem(HttpStatus status, @Nullable String detail, String errorCode) {
         var problem = ProblemDetail.forStatusAndDetail(status, detail);
         problem.setProperty("errorCode", errorCode);
         return problem;

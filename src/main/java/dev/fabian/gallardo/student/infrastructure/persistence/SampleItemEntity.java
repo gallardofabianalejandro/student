@@ -1,13 +1,14 @@
 package dev.fabian.gallardo.student.infrastructure.persistence;
 
-import dev.fabian.gallardo.student.domain.model.SampleItem;
 import com.nacionservicios.emv.persistence.audit.BaseAuditableEntity;
+import dev.fabian.gallardo.student.domain.model.SampleItem;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.util.UUID;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Entidad JPA. Es una clase y no un record porque JPA necesita un constructor sin argumentos y campos mutables; el
@@ -24,7 +25,7 @@ public class SampleItemEntity extends BaseAuditableEntity {
     private String name;
 
     @Column(length = 500)
-    private String description;
+    private @Nullable String description;
 
     @Column(nullable = false)
     private int quantity;
@@ -32,8 +33,7 @@ public class SampleItemEntity extends BaseAuditableEntity {
     @Column(nullable = false, precision = 12, scale = 2)
     private BigDecimal price;
 
-    protected SampleItemEntity() {
-    }
+    protected SampleItemEntity() {}
 
     static SampleItemEntity from(SampleItem item) {
         var entity = new SampleItemEntity();

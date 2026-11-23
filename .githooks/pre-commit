@@ -8,8 +8,12 @@ if echo "$staged" | grep -q '^deployment/'; then
   { python3 tools/check_manifests.py || python tools/check_manifests.py; } || exit 1
 fi
 
-if echo "$staged" | grep -q '\.java$'; then
-  echo "[pre-commit] spotless:check"
-  mvn -B -ntp -q -Dskip.frontend=true spotless:check || { echo "Formato Java incorrecto: corre 'task format'." >&2; exit 1; }
+java_files=$(echo "$staged" | grep '\.java$')
+if [ -n "$java_files" ]; then
+  # Solo los .java del commit: el repo puede tener archivos viejos fuera de formato y no deben bloquear.
+  names=$(echo "$java_files" | sed 's#.*/##; s#\.java$##' | paste -sd'|' -)
+  echo "[pre-commit] spotless:check en los archivos del commit"
+  mvn -B -ntp -q -Dskip.frontend=true spotless:check "-DspotlessFiles=.*(${names})\\.java" \
+    || { echo "Formato Java incorrecto en el commit: corre 'task format' o 'mvn spotless:apply -DspotlessFiles=...'." >&2; exit 1; }
 fi
 exit 0
