@@ -25,7 +25,7 @@
         <jacoco.minimum.application>0.80</jacoco.minimum.application>
         <jacoco.minimum.infrastructure>0.60</jacoco.minimum.infrastructure>
         <jacoco.minimum.api>0.70</jacoco.minimum.api>
-        <bootui.version>2.4.0</bootui.version>
+        <bootui.version>2.5.0</bootui.version>
         <frontend-maven-plugin.version>2.0.2</frontend-maven-plugin.version>
         <frontend.node.version>v24.15.0</frontend.node.version>
         <frontend.npm.version>11.6.2</frontend.npm.version>
