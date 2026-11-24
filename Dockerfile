@@ -4,7 +4,7 @@
 #   docker build --build-arg GH_PACKAGES_USER=<usuario> --secret id=GH_PACKAGES_TOKEN,env=GH_PACKAGES_TOKEN .
 # Alternativa que no necesita contenedor de build: `mvn jib:dockerBuild`.
 # Imagen no-alpine: frontend-maven-plugin descarga el Node de glibc, que no corre en musl.
-FROM maven:3.9.16-eclipse-temurin-25 AS build
+FROM maven:3.10.0-eclipse-temurin-25 AS build
 WORKDIR /app
 ARG GH_PACKAGES_USER
 COPY .mvn ./.mvn
