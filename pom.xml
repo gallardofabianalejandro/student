@@ -20,7 +20,7 @@
 
     <properties>
         <errorprone.version>2.53.0</errorprone.version>
-        <nullaway.version>0.13.7</nullaway.version>
+        <nullaway.version>0.14.4</nullaway.version>
         <jacoco.minimum.domain>0.90</jacoco.minimum.domain>
         <jacoco.minimum.application>0.80</jacoco.minimum.application>
         <jacoco.minimum.infrastructure>0.60</jacoco.minimum.infrastructure>
