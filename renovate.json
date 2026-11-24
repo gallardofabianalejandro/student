@@ -30,6 +30,28 @@
         "org.springframework.boot:**"
       ],
       "groupName": "spring-boot"
+    },
+    {
+      "description": "Los artefactos propios (plataforma) viven en GitHub Packages privado, no en Maven Central: Renovate no debe buscarlos (daba 429 y fallos de consulta). Se versionan con release.py en el ecosistema.",
+      "matchPackageNames": [
+        "com.nacionservicios.emv:**"
+      ],
+      "enabled": false
+    },
+    {
+      "description": "Cambios mayores solo con aprobacion manual en el Dependency Dashboard (p. ej. Postgres 16 a 19, TypeScript 7 o Node 26 no deben abrirse solos).",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "dependencyDashboardApproval": true
+    },
+    {
+      "description": "Postgres no se actualiza por bot: un salto de version mayor (16 a 19) se decide a mano y Renovate lo estaba preparando sin pedir aprobacion.",
+      "matchPackageNames": [
+        "postgres",
+        "docker.io/postgres"
+      ],
+      "enabled": false
     }
   ],
   "minimumReleaseAge": "3 days",
