@@ -19,7 +19,7 @@
     <name>student</name>
 
     <properties>
-        <errorprone.version>2.50.0</errorprone.version>
+        <errorprone.version>2.53.0</errorprone.version>
         <nullaway.version>0.13.7</nullaway.version>
         <jacoco.minimum.domain>0.90</jacoco.minimum.domain>
         <jacoco.minimum.application>0.80</jacoco.minimum.application>
