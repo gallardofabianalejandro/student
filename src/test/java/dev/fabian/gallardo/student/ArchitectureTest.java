@@ -67,17 +67,17 @@ class ArchitectureTest {
     @Test
     void nullMarked_whenInspectingDomainAndApplication_thenEveryPackageIsMarked() {
         List<String> unmarked = new ClassFileImporter()
-                .withImportOption(new ImportOption.DoNotIncludeTests())
-                .importPackages("dev.fabian.gallardo.student.domain", "dev.fabian.gallardo.student.application")
-                .stream()
-                .map(JavaClass::getPackage)
-                .distinct()
-                .filter(pkg -> pkg.tryGetPackageInfo()
-                        .map(info -> !info.isAnnotatedWith("org.jspecify.annotations.NullMarked"))
-                        .orElse(true))
-                .map(JavaPackage::getName)
-                .sorted()
-                .toList();
+                        .withImportOption(new ImportOption.DoNotIncludeTests())
+                        .importPackages("dev.fabian.gallardo.student.domain", "dev.fabian.gallardo.student.application")
+                        .stream()
+                        .map(JavaClass::getPackage)
+                        .distinct()
+                        .filter(pkg -> pkg.tryGetPackageInfo()
+                                .map(info -> !info.isAnnotatedWith("org.jspecify.annotations.NullMarked"))
+                                .orElse(true))
+                        .map(JavaPackage::getName)
+                        .sorted()
+                        .toList();
         org.assertj.core.api.Assertions.assertThat(unmarked)
                 .as("paquetes sin @NullMarked en package-info.java")
                 .isEmpty();
@@ -95,16 +95,18 @@ class ArchitectureTest {
                         .methodsShouldNotDeclareGenericExceptions()
                         .utilityClassesShouldBeFinalAndHavePrivateConstructor()
                         .imports(ImportsConfigurer::shouldHaveNoCycles)
-                        .naming(naming -> naming.constantsShouldFollowConventions()
-                                .interfacesShouldNotHavePrefixI()))
-                .test(test -> test.junit(junit -> junit.classesShouldBePackagePrivate(".*Test(s)?")
-                        .classesShouldNotBeAnnotatedWithDisabled()
-                        .methodsShouldNotBeAnnotatedWithDisabled()))
+                        .naming(naming ->
+                                naming.constantsShouldFollowConventions().interfacesShouldNotHavePrefixI()))
+                .test(test -> test.junit(
+                        junit -> junit.classesShouldBePackagePrivate(JavaClass.Predicates.simpleNameEndingWith("Test")
+                                        .or(JavaClass.Predicates.simpleNameEndingWith("Tests")))
+                                .classesShouldNotBeAnnotatedWithDisabled()
+                                .methodsShouldNotBeAnnotatedWithDisabled()))
                 .spring(spring -> spring.noAutowiredFields()
                         .boot(boot -> boot.applicationClassShouldResideInPackage("dev.fabian.gallardo.student"))
                         .configurations(config -> config.namesShouldMatch(".+(Config|Guard)"))
-                        .controllers(controllers -> controllers.namesShouldEndWithController()
-                                .shouldNotDependOnOtherControllers())
+                        .controllers(controllers ->
+                                controllers.namesShouldEndWithController().shouldNotDependOnOtherControllers())
                         .repositories(repositories -> repositories.shouldNotDependOnServices()))
                 .build()
                 .checkAll();
