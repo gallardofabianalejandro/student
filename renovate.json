@@ -52,6 +52,58 @@
         "docker.io/postgres"
       ],
       "enabled": false
+    },
+    {
+      "description": "Automerge: GitHub Actions (minor, parche, digest y pin) cuando el CI esta en verde.",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin",
+        "pinDigest"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Automerge: npm (frontend, e2e y template), solo minor y parche, cuando el CI esta en verde.",
+      "matchManagers": [
+        "npm"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Automerge: herramientas Maven de student (errorprone, nullaway, bootui), solo minor y parche, cuando el CI esta en verde.",
+      "matchManagers": [
+        "maven"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch"
+      ],
+      "automerge": true
+    },
+    {
+      "description": "Nunca automerge: cambios mayores.",
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "automerge": false
+    },
+    {
+      "description": "Nunca automerge: Spring Boot, Spring Cloud ni los artefactos de la plataforma (se revisan a mano).",
+      "matchPackageNames": [
+        "org.springframework.boot:**",
+        "org.springframework.cloud:**",
+        "com.nacionservicios.emv:**"
+      ],
+      "automerge": false
     }
   ],
   "minimumReleaseAge": "3 days",
@@ -59,5 +111,7 @@
     "managerFilePatterns": [
       "/^deployment/.+\\.ya?ml$/"
     ]
-  }
+  },
+  "platformAutomerge": false,
+  "automergeStrategy": "merge-commit"
 }
