@@ -19,6 +19,7 @@ Reglas ArchUnit:
 - `application` no depende de `infrastructure` ni de `api`.
 - Las `@Entity` viven solo en `infrastructure.persistence`; los `@RestController` solo en `api`.
 - Sin inyeccion por campo, sin `System.out`, sin excepciones genericas.
+- Ninguna clase de produccion usa `RestTemplate`, `RestTemplateBuilder` ni `RestTemplateCustomizer`: los clientes HTTP salientes son interfaces `@HttpExchange` sobre `RestClient` (ADR-006).
 
 Reglas Taikai:
 - Sin APIs deprecadas, sin ciclos de imports, clases utilitarias `final` con constructor privado.

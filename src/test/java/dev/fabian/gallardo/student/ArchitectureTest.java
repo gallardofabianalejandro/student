@@ -55,6 +55,15 @@ class ArchitectureTest {
             .should()
             .resideInAPackage("..api..");
 
+    // RestTemplate quedo deprecado en Spring Framework 7.1: los clientes HTTP salientes usan interfaces
+    // @HttpExchange sobre el RestClient del httpclient-spring-boot-starter. Ver ADR-006 del ecosistema.
+    @ArchTest
+    static final ArchRule noRestTemplate = noClasses()
+            .should()
+            .dependOnClassesThat()
+            .haveNameMatching("org\\.springframework\\..*RestTemplate(Builder|Customizer)?")
+            .because("RestTemplate esta deprecado: usar @HttpExchange sobre RestClient (ADR-006)");
+
     @ArchTest
     static final ArchRule noFieldInjection = GeneralCodingRules.NO_CLASSES_SHOULD_USE_FIELD_INJECTION;
 
